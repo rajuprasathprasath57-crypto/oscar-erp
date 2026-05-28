@@ -154,31 +154,46 @@ function Enquiries() {
 
   const handleMtpFormChange = (e) => {
     const { name, value } = e.target
-    const numValue = name === 'model' ? value : (value === '' ? '' : parseFloat(value) || 0)
     setMtpForm(prev => {
-      const u = { ...prev, [name]: numValue }
-      if (['quantity', 'price', 'extra_charge', 'gst_percentage'].includes(name)) {
-        const qty = name === 'quantity' ? numValue : prev.quantity
-        const price = name === 'price' ? numValue : prev.price
-        const extra = name === 'extra_charge' ? numValue : prev.extra_charge
-        const gstPct = name === 'gst_percentage' ? numValue : prev.gst_percentage
-        const total = qty * price
-        const gstAmt = (total + extra) * (gstPct / 100)
-        u.total = total; u.gst_amount = gstAmt; u.grand_total = total + extra + gstAmt
-        u.balance = Math.max(0, u.grand_total - prev.advance - prev.claim)
-      }
-      if (['advance', 'claim'].includes(name)) {
-        u.balance = Math.max(0, prev.grand_total - (name === 'advance' ? numValue : prev.advance) - (name === 'claim' ? numValue : prev.claim))
-      }
+      const u = { ...prev, [name]: value }
+      // Only calculate if both qty and price have values
+      const qty = parseFloat(name === 'quantity' ? value : prev.quantity) || 0
+      const price = parseFloat(name === 'price' ? value : prev.price) || 0
+      const extra = parseFloat(name === 'extra_charge' ? value : prev.extra_charge) || 0
+      const gstPct = name === 'gst_percentage' ? parseFloat(value) || 0 : (parseFloat(prev.gst_percentage) || 0)
+      const total = qty * price
+      const gstAmt = (total + extra) * (gstPct / 100)
+      u.total = total
+      u.gst_amount = gstAmt
+      u.grand_total = total + extra + gstAmt
+      const adv = parseFloat(name === 'advance' ? value : prev.advance) || 0
+      const clm = parseFloat(name === 'claim' ? value : prev.claim) || 0
+      u.balance = Math.max(0, (total + extra + gstAmt) - adv - clm)
       return u
     })
   }
 
   const handleMTPSubmit = async (e) => {
     e.preventDefault()
+    if (!mtpForm.model.trim()) { setMsg({ text: 'Model name is required!', type: 'error' }); return }
+    if (!mtpForm.quantity || !mtpForm.price) { setMsg({ text: 'Quantity and Price are required!', type: 'error' }); return }
     try {
+      const insertData = {
+        enquiry_id: selectedEnquiry.id,
+        model: mtpForm.model,
+        quantity: parseInt(mtpForm.quantity) || 1,
+        price: parseFloat(mtpForm.price) || 0,
+        total: parseFloat(mtpForm.total) || 0,
+        extra_charge: parseFloat(mtpForm.extra_charge) || 0,
+        gst_percentage: parseInt(mtpForm.gst_percentage) || 0,
+        gst_amount: parseFloat(mtpForm.gst_amount) || 0,
+        grand_total: parseFloat(mtpForm.grand_total) || 0,
+        advance: parseFloat(mtpForm.advance) || 0,
+        claim: parseFloat(mtpForm.claim) || 0,
+        balance: parseFloat(mtpForm.balance) || 0
+      }
       await supabase.from('enquiries').update({ stage: 'production' }).eq('id', selectedEnquiry.id)
-      const { error } = await supabase.from('productions').insert([{ enquiry_id: selectedEnquiry.id, ...mtpForm }])
+      const { error } = await supabase.from('productions').insert([insertData])
       if (error) throw error
       setMsg({ text: 'Moved to Production successfully!', type: 'success' })
       setShowMTPModal(false); setSelectedEnquiry(null); loadEnquiries()

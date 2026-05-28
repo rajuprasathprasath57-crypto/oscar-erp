@@ -52,7 +52,7 @@ function Production() {
     if (newIdx < 0 || newIdx >= STAGES.length) return
     const newStatus = STAGES[newIdx]
     try {
-      await supabase.from('productions').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', prod.id)
+      await supabase.from('productions').update({ status: newStatus, created_at: new Date().toISOString() }).eq('id', prod.id)
       setMsg({ text: `Status updated to: ${newStatus}`, type: 'success' })
       loadProductions()
       // Auto-open dispatch modal when status reaches "ready"
@@ -145,7 +145,7 @@ function Production() {
         const err = await res.json()
         throw new Error(err.message || 'Dispatch failed')
       }
-      await supabase.from('productions').update({ status: 'dispatched', updated_at: new Date().toISOString() }).eq('id', selectedProd.id)
+      await supabase.from('productions').update({ status: 'dispatched', created_at: new Date().toISOString() }).eq('id', selectedProd.id)
       setMsg({ text: 'Dispatched successfully!', type: 'success' })
       setDispatchModal(false)
       setSelectedProd(null)
@@ -156,7 +156,7 @@ function Production() {
   const handleDelete = async (id) => {
     if (!confirm('Move this production to bin?')) return
     try {
-      await supabase.from('productions').update({ status: 'deleted', updated_at: new Date().toISOString() }).eq('id', id)
+      await supabase.from('productions').update({ status: 'deleted', created_at: new Date().toISOString() }).eq('id', id)
       setMsg({ text: 'Moved to bin!', type: 'success' })
       loadProductions(); loadBin()
     } catch (err) { setMsg({ text: 'Error: ' + err.message, type: 'error' }) }
@@ -164,7 +164,7 @@ function Production() {
 
   const handleRestore = async (id) => {
     try {
-      await supabase.from('productions').update({ status: 'cutting', updated_at: new Date().toISOString() }).eq('id', id)
+      await supabase.from('productions').update({ status: 'cutting', created_at: new Date().toISOString() }).eq('id', id)
       setMsg({ text: 'Restored successfully!', type: 'success' })
       loadProductions(); loadBin()
     } catch (err) { setMsg({ text: 'Error: ' + err.message, type: 'error' }) }
@@ -182,30 +182,32 @@ function Production() {
   const openEditModal = (prod) => {
     setSelectedProd(prod)
     setEditForm({
-      model: prod.model || '', quantity: prod.quantity || 1, price: prod.price || '', total: prod.total || '',
-      extra_charge: prod.extra_charge || '', gst_percentage: prod.gst_percentage || 0, gst_amount: prod.gst_amount || '',
-      grand_total: prod.grand_total || '', advance: prod.advance || '', claim: prod.claim || '', balance: prod.balance || ''
+      model: prod.model || '', quantity: prod.quantity ? String(prod.quantity) : '', price: prod.price ? String(prod.price) : '',
+      total: prod.total || 0, extra_charge: prod.extra_charge ? String(prod.extra_charge) : '',
+      gst_percentage: prod.gst_percentage || 0, gst_amount: prod.gst_amount || 0,
+      grand_total: prod.grand_total || 0, advance: prod.advance ? String(prod.advance) : '',
+      claim: prod.claim ? String(prod.claim) : '', balance: prod.balance || 0
     })
     setEditModal(true)
   }
 
   const handleEditChange = (e) => {
     const { name, value } = e.target
-    const numValue = value === '' ? '' : (name === 'model' ? value : parseFloat(value) || 0)
     setEditForm(prev => {
-      const updated = { ...prev, [name]: numValue }
-      if (name === 'model') return updated
-      const qty = name === 'quantity' ? (numValue === '' ? 0 : numValue) : (prev.quantity === '' ? 0 : parseFloat(prev.quantity) || 0)
-      const price = name === 'price' ? (numValue === '' ? 0 : numValue) : (prev.price === '' ? 0 : parseFloat(prev.price) || 0)
-      const extra = name === 'extra_charge' ? (numValue === '' ? 0 : numValue) : (prev.extra_charge === '' ? 0 : parseFloat(prev.extra_charge) || 0)
-      const gstPct = name === 'gst_percentage' ? numValue : prev.gst_percentage
+      const raw = value === '' ? '' : (name === 'model' ? value : parseFloat(value) || 0)
+      const updated = { ...prev, [name]: raw }
+      if (name === 'model' || name === 'gst_percentage') return updated
+      const qty = parseFloat(name === 'quantity' ? raw : prev.quantity) || 0
+      const price = parseFloat(name === 'price' ? raw : prev.price) || 0
+      const extra = parseFloat(name === 'extra_charge' ? raw : prev.extra_charge) || 0
+      const gstPct = parseFloat(prev.gst_percentage) || 0
       const total = qty * price
       const gstAmt = (total + extra) * (gstPct / 100)
       updated.total = total
       updated.gst_amount = gstAmt
       updated.grand_total = total + extra + gstAmt
-      const adv = name === 'advance' ? (numValue === '' ? 0 : numValue) : (prev.advance === '' ? 0 : parseFloat(prev.advance) || 0)
-      const clm = name === 'claim' ? (numValue === '' ? 0 : numValue) : (prev.claim === '' ? 0 : parseFloat(prev.claim) || 0)
+      const adv = parseFloat(name === 'advance' ? raw : prev.advance) || 0
+      const clm = parseFloat(name === 'claim' ? raw : prev.claim) || 0
       updated.balance = Math.max(0, updated.grand_total - adv - clm)
       return updated
     })
@@ -214,7 +216,7 @@ function Production() {
   const handleEditSave = async (e) => {
     e.preventDefault()
     try {
-      await supabase.from('productions').update({ ...editForm, updated_at: new Date().toISOString() }).eq('id', selectedProd.id)
+      await supabase.from('productions').update({ ...editForm, created_at: new Date().toISOString() }).eq('id', selectedProd.id)
       setMsg({ text: 'Production updated!', type: 'success' })
       setEditModal(false); setSelectedProd(null)
       loadProductions()
