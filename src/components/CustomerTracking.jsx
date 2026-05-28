@@ -1,0 +1,229 @@
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+
+const STAGES = ['cutting', 'attatching', 'plate', 'emossing', 'stitching', 'packing', 'ready']
+
+const STAGE_LABELS = {
+  cutting: 'Cutting', attatching: 'Attaching', plate: 'Plate Work',
+  emossing: 'Embossing', stitching: 'Stitching', packing: 'Packing',
+  ready: 'Ready'
+}
+
+const STAGE_ICONS = {
+  cutting: '✂️', attatching: '🔗', plate: '📋',
+  emossing: '🔥', stitching: '🧵', packing: '📦',
+  ready: '✅'
+}
+
+function CustomerTracking() {
+  const { id } = useParams()
+  const [production, setProduction] = useState(null)
+  const [dispatch, setDispatch] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    loadTracking()
+  }, [id])
+
+  const loadTracking = async () => {
+    setLoading(true)
+    try {
+      // Load production with enquiry details - use maybeSingle instead of single
+      const { data: prod, error: prodError } = await supabase
+        .from('productions')
+        .select('*, enquiries (customer_name, enquiry_date, order_from, mobile, location, state)')
+        .eq('id', id)
+        .maybeSingle()
+      
+      if (prodError) throw prodError
+      if (!prod || prod.status === 'deleted') {
+        setError('Order not found!')
+        return
+      }
+      
+      setProduction(prod)
+
+      // Load dispatch info if available - use maybeSingle
+      const { data: disp } = await supabase
+        .from('dispatch')
+        .select('*')
+        .eq('production_id', id)
+        .maybeSingle()
+      
+      setDispatch(disp)
+    } catch (err) {
+      setError('Order not found or an error occurred.')
+      console.error('Error loading tracking:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="customer-tracking">
+        <div className="tracking-header">
+          <img src="/logo.jpeg" alt="OSCAR LEATHER" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', marginBottom: '12px' }} />
+          <h1>OSCAR LEATHER PRODUCTS</h1>
+          <p>Loading your order status...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !production) {
+    return (
+      <div className="customer-tracking">
+        <div className="tracking-header">
+          <img src="/logo.jpeg" alt="OSCAR LEATHER" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', marginBottom: '12px' }} />
+          <h1>OSCAR LEATHER PRODUCTS</h1>
+          <p>Track Your Order</p>
+        </div>
+        <div className="tracking-order-card" style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+          <h2 style={{ color: '#e74c3c' }}>{error || 'Order Not Found'}</h2>
+          <p style={{ color: '#666', marginTop: '8px' }}>Please check your tracking link and try again.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const currentIdx = STAGES.indexOf(production.status)
+
+  return (
+    <div className="customer-tracking">
+      <div className="tracking-header">
+        <img src="/logo.jpeg" alt="OSCAR LEATHER" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', marginBottom: '12px' }} />
+        <h1>OSCAR LEATHER PRODUCTS</h1>
+        <p>Track Your Order Status</p>
+      </div>
+
+      <div className="tracking-order-card">
+        <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>
+          Order #{production.id} - {production.model || 'Leather Product'}
+        </h2>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px', background: '#f8f9fa', padding: '16px', borderRadius: '10px' }}>
+          <div>
+            <small style={{ color: '#999' }}>Customer</small>
+            <p style={{ fontWeight: 600 }}>{production.enquiries?.customer_name || 'N/A'}</p>
+          </div>
+          <div>
+            <small style={{ color: '#999' }}>Order Date</small>
+            <p style={{ fontWeight: 600 }}>{production.enquiries?.enquiry_date || 'N/A'}</p>
+          </div>
+          <div>
+            <small style={{ color: '#999' }}>Quantity</small>
+            <p style={{ fontWeight: 600 }}>{production.quantity}</p>
+          </div>
+          <div>
+            <small style={{ color: '#999' }}>Source</small>
+            <p style={{ fontWeight: 600 }}>{production.enquiries?.order_from || 'N/A'}</p>
+          </div>
+        </div>
+
+        {/* Progress Tracker */}
+        <div className="progress-tracker">
+          {STAGES.map((stage, idx) => {
+            const stageIcon = STAGE_ICONS[stage]
+            const stageLabel = STAGE_LABELS[stage]
+            let stepClass = ''
+            if (idx < currentIdx) stepClass = 'completed'
+            else if (idx === currentIdx) stepClass = 'active'
+
+            return (
+              <div key={stage} className={`progress-step ${stepClass}`}>
+                <div className="step-circle">
+                  {idx < currentIdx ? '✓' : idx === currentIdx ? stageIcon : stageIcon}
+                </div>
+                <div className="step-label">{stageLabel}</div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Current Status */}
+        <div style={{ textAlign: 'center', padding: '16px', background: '#e8f5e9', borderRadius: '10px', marginTop: '10px' }}>
+          <p style={{ fontSize: '14px', color: '#555' }}>Current Status</p>
+          <h3 style={{ fontSize: '22px', color: '#2e7d32', marginTop: '4px' }}>
+            {STAGE_ICONS[production.status]} {STAGE_LABELS[production.status]}
+          </h3>
+        </div>
+      </div>
+
+      {/* Dispatch Information */}
+      {dispatch && (
+        <div className="tracking-order-card">
+          <h3 style={{ fontSize: '18px', marginBottom: '16px' }}>🚚 Shipping Information</h3>
+          
+          <div className="tracking-dispatch">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+              <div>
+                <small style={{ color: '#999' }}>Courier Partner</small>
+                <p style={{ fontWeight: 600, fontSize: '16px' }}>{dispatch.courier_name}</p>
+              </div>
+              <div>
+                <small style={{ color: '#999' }}>Tracking ID</small>
+                <p style={{ fontWeight: 600, fontSize: '16px', color: '#3498db' }}>{dispatch.tracking_id}</p>
+              </div>
+              <div>
+                <small style={{ color: '#999' }}>Dispatched On</small>
+                <p style={{ fontWeight: 600, fontSize: '16px' }}>
+                  {new Date(dispatch.dispatched_at).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </p>
+              </div>
+            </div>
+
+            {/* Courier Photos */}
+            {dispatch.photo_urls && dispatch.photo_urls.length > 0 && (
+              <div style={{ marginTop: '20px' }}>
+                <p style={{ fontWeight: 600, marginBottom: '10px', color: '#555' }}>📸 Dispatch Photos</p>
+                <div className="photo-preview">
+                  {dispatch.photo_urls.map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                      <img 
+                        src={url} 
+                        alt={`Dispatch photo ${i+1}`} 
+                        style={{ 
+                          width: '100%', 
+                          height: '160px', 
+                          objectFit: 'cover', 
+                          borderRadius: '10px',
+                          border: '1px solid #eee',
+                          transition: 'transform 0.2s'
+                        }}
+                        onMouseOver={e => e.target.style.transform = 'scale(1.02)'}
+                        onMouseOut={e => e.target.style.transform = 'scale(1)'}
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Contact Information */}
+      <div className="tracking-order-card" style={{ textAlign: 'center', background: '#fff8f0' }}>
+        <p style={{ color: '#666', fontSize: '14px' }}>
+          Need help? Contact us at <strong style={{ color: '#e94560' }}>7904927682</strong>
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div style={{ textAlign: 'center', marginTop: '30px', color: '#aaa', fontSize: '12px' }}>
+        <p>OSCAR LEATHER PRODUCTS</p>
+        <p style={{ marginTop: '4px' }}>Quality Leather Products</p>
+      </div>
+    </div>
+  )
+}
+
+export default CustomerTracking
