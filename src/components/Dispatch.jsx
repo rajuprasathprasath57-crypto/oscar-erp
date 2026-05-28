@@ -24,22 +24,48 @@ function Dispatch() {
   const loadData = async () => {
     setLoading(true)
     try {
-      // Load productions that are in "ready" stage (ready to dispatch)
-      const { data: prods, error: prodError } = await supabase
-        .from('productions')
-        .select('*, enquiries (customer_name, mobile, location, state)')
-        .eq('status', 'ready')
-        .order('created_at', { ascending: false })
-      if (prodError) throw prodError
+      const API_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+      // Load productions that are in "ready" stage
+      const prodRes = await fetch('https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?status=eq.ready&select=id,model,quantity,enquiry_id,created_at&order=created_at.desc', {
+        headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+      })
+      const prods = await prodRes.json()
+      
+      // Get customer names for each production
+      if (prods && prods.length) {
+        const enqIds = [...new Set(prods.map(p => p.enquiry_id))]
+        const enqRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${enqIds.join(',')})&select=id,customer_name,mobile,location,state`, {
+          headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+        })
+        const enqs = await enqRes.json()
+        enqs.forEach(e => { prods.filter(p => p.enquiry_id === e.id).forEach(p => p.customer = e) })
+      }
       setProductions(prods || [])
 
-      // Load existing dispatches
-      const { data: disp, error: dispError } = await supabase
-        .from('dispatch')
-        .select('*, productions (model, quantity, enquiries (customer_name))')
-        .order('created_at', { ascending: false })
-      if (dispError) throw dispError
-      setDispatches(disp || [])
+      // Load dispatches with production data via direct fetch
+      const dispRes = await fetch('https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/dispatch?order=created_at.desc&select=id,production_id,enquiry_id,courier_name,tracking_id,photo_urls,created_at', {
+        headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+      })
+      let dispData = await dispRes.json()
+      
+      // Get production models
+      if (dispData && dispData.length) {
+        const prodIds = [...new Set(dispData.map(d => d.production_id))]
+        const pRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?id=in.(${prodIds.join(',')})&select=id,model,quantity,enquiry_id`, {
+          headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+        })
+        const prodsData = await pRes.json()
+        const enqIds = [...new Set(prodsData.map(p => p.enquiry_id))]
+        const eRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${enqIds.join(',')})&select=id,customer_name`, {
+          headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+        })
+        const enqsData = await eRes.json()
+        dispData.forEach(d => {
+          const prod = prodsData.find(p => p.id === d.production_id)
+          d.productions = prod ? { model: prod.model, quantity: prod.quantity, enquiries: { customer_name: enqsData.find(e => e.id === prod.enquiry_id)?.customer_name || '' } } : null
+        })
+      }
+      setDispatches(dispData || [])
     } catch (err) {
       console.error('Error loading data:', err)
     } finally {
@@ -219,10 +245,10 @@ function Dispatch() {
               {productions.map((prod) => (
                 <tr key={prod.id}>
                   <td style={{ fontWeight: 600 }}>#{prod.id}</td>
-                  <td>{prod.enquiries?.customer_name || 'N/A'}</td>
+                  <td>{prod.customer?.customer_name || 'N/A'}</td>
                   <td>{prod.model || 'N/A'}</td>
                   <td>{prod.quantity}</td>
-                  <td>{prod.enquiries?.mobile || prod.enquiries?.location || 'N/A'}</td>
+                  <td>{prod.customer?.mobile || prod.customer?.location || 'N/A'}</td>
                   <td>
                     <button className="btn btn-sm btn-success" onClick={() => openDispatchModal(prod)}>
                       📦 Dispatch Now
@@ -287,7 +313,7 @@ function Dispatch() {
             <h2>📦 Dispatch Order</h2>
             {selectedProd && (
               <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
-                <p><strong>Customer:</strong> {selectedProd.enquiries?.customer_name}</p>
+                <p><strong>Customer:</strong> {selectedProd.customer?.customer_name || 'N/A'}</p>
                 <p><strong>Model:</strong> {selectedProd.model}</p>
                 <p><strong>Quantity:</strong> {selectedProd.quantity}</p>
               </div>
