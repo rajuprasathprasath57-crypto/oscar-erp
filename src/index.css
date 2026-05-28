@@ -676,23 +676,118 @@ table tr:last-child td {
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 60px;
+    width: 50px;
   }
-  .sidebar-header h2, .sidebar-header p, .sidebar nav a span {
+  .sidebar-header {
+    padding: 12px 5px;
+  }
+  .sidebar-header h2, .sidebar-header p {
     display: none;
   }
   .sidebar nav a {
     justify-content: center;
-    padding: 14px;
+    padding: 12px 5px;
+    font-size: 10px;
+  }
+  .sidebar nav a span {
+    display: none;
   }
   .sidebar nav a .icon {
     margin: 0;
+    font-size: 20px;
   }
   .main-content {
-    margin-left: 60px;
-    padding: 15px;
+    margin-left: 50px;
+    padding: 10px;
+  }
+  .page-header h1 {
+    font-size: 16px;
+  }
+  .page-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .page-header .btn {
+    width: 100%;
+    justify-content: center;
   }
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .card {
+    padding: 14px;
+    overflow-x: auto;
+  }
+  table {
+    font-size: 11px;
+  }
+  table th, table td {
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+  .filter-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .filter-bar .form-group {
+    min-width: 100%;
+  }
+  .status-bar {
+    gap: 6px;
+  }
+  .status-bar .btn-sm {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  .tracking-link-box {
+    padding: 8px;
+  }
+  .tracking-link-box input {
+    width: 100%;
+    font-size: 10px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 40px;
+  }
+  .sidebar nav a {
+    padding: 10px 3px;
+  }
+  .sidebar nav a .icon {
+    font-size: 16px;
+  }
+  .main-content {
+    margin-left: 40px;
+    padding: 8px;
+  }
+  .card {
+    padding: 10px;
+  }
+  table th, table td {
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+  .customer-tracking {
+    padding: 10px;
+    margin: 10px auto;
+  }
+  .tracking-order-card {
+    padding: 16px;
+  }
+  .progress-tracker {
+    padding: 0 5px;
+  }
+  .progress-step .step-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+  .progress-step .step-label {
+    font-size: 8px;
   }
 }

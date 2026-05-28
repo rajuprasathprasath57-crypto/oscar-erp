@@ -167,7 +167,7 @@ function Dispatch() {
       // Update production status to dispatched
       const { error: prodError } = await supabase
         .from('productions')
-        .update({ status: 'dispatched', updated_at: new Date().toISOString() })
+        .update({ status: 'dispatched', created_at: new Date().toISOString() })
         .eq('id', selectedProd.id)
       if (prodError) throw prodError
 

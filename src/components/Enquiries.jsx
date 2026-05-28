@@ -156,7 +156,6 @@ function Enquiries() {
     const { name, value } = e.target
     setMtpForm(prev => {
       const u = { ...prev, [name]: value }
-      // Only calculate if both qty and price have values
       const qty = parseFloat(name === 'quantity' ? value : prev.quantity) || 0
       const price = parseFloat(name === 'price' ? value : prev.price) || 0
       const extra = parseFloat(name === 'extra_charge' ? value : prev.extra_charge) || 0
@@ -168,7 +167,7 @@ function Enquiries() {
       u.grand_total = total + extra + gstAmt
       const adv = parseFloat(name === 'advance' ? value : prev.advance) || 0
       const clm = parseFloat(name === 'claim' ? value : prev.claim) || 0
-      u.balance = Math.max(0, (total + extra + gstAmt) - adv - clm)
+      u.balance = (total + extra + gstAmt) - adv - clm
       return u
     })
   }
