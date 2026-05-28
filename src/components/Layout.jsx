@@ -33,6 +33,10 @@ function Layout({ onLogout }) {
             <span className="icon">🚚</span>
             <span>Dispatch</span>
           </NavLink>
+          <NavLink to="/reports">
+            <span className="icon">📊</span>
+            <span>Reports</span>
+          </NavLink>
           <a href="#" onClick={handleLogout} style={{ marginTop: 'auto', borderTop: '1px solid #0f3460' }}>
             <span className="icon">🚪</span>
             <span>Logout</span>

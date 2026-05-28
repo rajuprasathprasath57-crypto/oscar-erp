@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard'
 import Enquiries from './components/Enquiries'
 import Production from './components/Production'
 import Dispatch from './components/Dispatch'
+import Reports from './components/Reports'
 import CustomerTracking from './components/CustomerTracking'
 import Login from './components/Login'
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="enquiries" element={<Enquiries />} />
         <Route path="production" element={<Production />} />
         <Route path="dispatch" element={<Dispatch />} />
+        <Route path="reports" element={<Reports />} />
       </Route>
       <Route 
         path="/login" 
