@@ -5,6 +5,7 @@ function Reports() {
   const [yearlyData, setYearlyData] = useState([])
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [loading, setLoading] = useState(true)
+  const [years, setYears] = useState([])
 
   useEffect(() => {
     loadReports()
@@ -15,52 +16,67 @@ function Reports() {
     try {
       const API_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-      // Get all dispatched productions
+      // Get ALL productions (not just dispatched) with their enquiry data
       const prodRes = await fetch(
-        `https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?status=eq.dispatched&select=id,enquiry_id,grand_total,advance,claim,balance,created_at`,
+        `https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?select=id,enquiry_id,grand_total,advance,claim,balance,extra_charge,gst_amount,total,price,quantity,model,status,created_at&order=created_at.desc`,
         { headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY } }
       )
       const allProds = await prodRes.json()
-      const dispatched = allProds || []
+      const prods = allProds || []
 
-      // Get all enquiries for customer names
-      const enqIds = [...new Set(dispatched.map(p => p.enquiry_id).filter(Boolean))]
-      let enqMap = {}
+      // Get all enquiries
+      const enqIds = [...new Set(prods.map(p => p.enquiry_id).filter(Boolean))]
+      let enqData = []
       if (enqIds.length) {
         const enqRes = await fetch(
-          `https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${enqIds.join(',')})&select=id,customer_name,order_from`,
+          `https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${enqIds.join(',')})&select=id,customer_name,order_from,enquiry_date`,
           { headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY } }
         )
-        const enqs = await enqRes.json()
-        enqs.forEach(e => { enqMap[e.id] = e.customer_name })
+        enqData = await enqRes.json() || []
+      }
+      const enqMap = {}
+      enqData.forEach(e => { enqMap[e.id] = e })
+
+      // Get available years
+      const availYears = [...new Set(prods.map(p => new Date(p.created_at).getFullYear()).filter(Boolean))].sort()
+      setYears(availYears)
+      if (!availYears.includes(selectedYear) && availYears.length) {
+        setSelectedYear(availYears[availYears.length - 1])
       }
 
       // Monthly breakdown for selected year
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
       const monthTotals = months.map((m, i) => {
-        const monthProds = dispatched.filter(p => {
+        const monthProds = prods.filter(p => {
+          if (!p.created_at) return false
           const d = new Date(p.created_at)
           return d.getFullYear() === parseInt(selectedYear) && d.getMonth() === i
         })
         return {
           month: m,
           count: monthProds.length,
+          dispatched: monthProds.filter(p => p.status === 'dispatched').length,
           grand_total: monthProds.reduce((s, p) => s + parseFloat(p.grand_total || 0), 0),
           advance: monthProds.reduce((s, p) => s + parseFloat(p.advance || 0), 0),
+          claim: monthProds.reduce((s, p) => s + parseFloat(p.claim || 0), 0),
           balance: monthProds.reduce((s, p) => s + parseFloat(p.balance || 0), 0)
         }
       })
       setMonthlyData(monthTotals)
 
       // Yearly breakdown
-      const years = [...new Set(dispatched.map(p => new Date(p.created_at).getFullYear()))].sort()
-      const yearTotals = years.map(y => {
-        const yrProds = dispatched.filter(p => new Date(p.created_at).getFullYear() === y)
+      const yearTotals = availYears.map(y => {
+        const yrProds = prods.filter(p => {
+          if (!p.created_at) return false
+          return new Date(p.created_at).getFullYear() === y
+        })
         return {
           year: y,
           count: yrProds.length,
+          dispatched: yrProds.filter(p => p.status === 'dispatched').length,
           grand_total: yrProds.reduce((s, p) => s + parseFloat(p.grand_total || 0), 0),
           advance: yrProds.reduce((s, p) => s + parseFloat(p.advance || 0), 0),
+          claim: yrProds.reduce((s, p) => s + parseFloat(p.claim || 0), 0),
           balance: yrProds.reduce((s, p) => s + parseFloat(p.balance || 0), 0)
         }
       })
@@ -87,10 +103,10 @@ function Reports() {
         <h1>📊 Reports</h1>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <label style={{ fontSize: '13px', color: '#8b7355', fontWeight: 700 }}>Year:</label>
-          <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)}
+          <select value={selectedYear} onChange={e => setSelectedYear(parseInt(e.target.value))}
             style={{ padding: '8px 12px', border: '1.5px solid #ddd0c0', borderRadius: '8px', background: 'white' }}>
-            {yearlyData.map(y => <option key={y.year} value={y.year}>{y.year}</option>)}
-            {yearlyData.length === 0 && <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>}
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+            {years.length === 0 && <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>}
           </select>
         </div>
       </div>
@@ -115,7 +131,7 @@ function Reports() {
         <div className="card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '28px', marginBottom: '4px' }}>📦</div>
           <h3 style={{ fontSize: '22px', color: '#1565c0', fontWeight: 700 }}>{yearlyData.reduce((s, y) => s + y.count, 0)}</h3>
-          <p style={{ color: '#666', fontSize: '13px' }}>Total Orders Dispatched</p>
+          <p style={{ color: '#666', fontSize: '13px' }}>Total Orders</p>
         </div>
       </div>
 
@@ -128,6 +144,7 @@ function Reports() {
               <tr>
                 <th>Month</th>
                 <th>Orders</th>
+                <th>Dispatched</th>
                 <th>Grand Total</th>
                 <th>Advance</th>
                 <th>Balance</th>
@@ -138,6 +155,7 @@ function Reports() {
                 <tr key={i}>
                   <td style={{ fontWeight: 600 }}>{m.month}</td>
                   <td>{m.count}</td>
+                  <td>{m.dispatched}</td>
                   <td style={{ color: '#2e7d32', fontWeight: 600 }}>₹{m.grand_total.toFixed(2)}</td>
                   <td style={{ color: '#e94560', fontWeight: 600 }}>₹{m.advance.toFixed(2)}</td>
                   <td style={{ color: '#e65100', fontWeight: 600 }}>₹{m.balance.toFixed(2)}</td>
@@ -146,6 +164,7 @@ function Reports() {
               <tr style={{ background: '#f5f0eb', fontWeight: 700 }}>
                 <td>Total</td>
                 <td>{monthlyData.reduce((s, m) => s + m.count, 0)}</td>
+                <td>{monthlyData.reduce((s, m) => s + m.dispatched, 0)}</td>
                 <td style={{ color: '#2e7d32' }}>₹{monthlyData.reduce((s, m) => s + m.grand_total, 0).toFixed(2)}</td>
                 <td style={{ color: '#e94560' }}>₹{monthlyData.reduce((s, m) => s + m.advance, 0).toFixed(2)}</td>
                 <td style={{ color: '#e65100' }}>₹{monthlyData.reduce((s, m) => s + m.balance, 0).toFixed(2)}</td>
@@ -164,6 +183,7 @@ function Reports() {
               <tr>
                 <th>Year</th>
                 <th>Orders</th>
+                <th>Dispatched</th>
                 <th>Grand Total</th>
                 <th>Advance</th>
                 <th>Balance</th>
@@ -171,12 +191,13 @@ function Reports() {
             </thead>
             <tbody>
               {yearlyData.length === 0 ? (
-                <tr><td colSpan="5" style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No dispatched orders yet</td></tr>
+                <tr><td colSpan="6" style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No orders yet</td></tr>
               ) : (
                 yearlyData.map((y, i) => (
                   <tr key={i}>
                     <td style={{ fontWeight: 600 }}>{y.year}</td>
                     <td>{y.count}</td>
+                    <td>{y.dispatched}</td>
                     <td style={{ color: '#2e7d32', fontWeight: 600 }}>₹{y.grand_total.toFixed(2)}</td>
                     <td style={{ color: '#e94560', fontWeight: 600 }}>₹{y.advance.toFixed(2)}</td>
                     <td style={{ color: '#e65100', fontWeight: 600 }}>₹{y.balance.toFixed(2)}</td>
@@ -187,6 +208,7 @@ function Reports() {
                 <tr style={{ background: '#f5f0eb', fontWeight: 700 }}>
                   <td>Total</td>
                   <td>{yearlyData.reduce((s, y) => s + y.count, 0)}</td>
+                  <td>{yearlyData.reduce((s, y) => s + y.dispatched, 0)}</td>
                   <td style={{ color: '#2e7d32' }}>₹{totalGrand.toFixed(2)}</td>
                   <td style={{ color: '#e94560' }}>₹{totalAdvance.toFixed(2)}</td>
                   <td style={{ color: '#e65100' }}>₹{totalBalance.toFixed(2)}</td>

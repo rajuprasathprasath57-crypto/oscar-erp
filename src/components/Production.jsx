@@ -16,6 +16,7 @@ function Production() {
   const [uploading, setUploading] = useState(false)
   const [editForm, setEditForm] = useState({})
   const [showBin, setShowBin] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { loadProductions(); loadBin() }, [])

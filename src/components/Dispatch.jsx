@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase'
 function Dispatch() {
   const [productions, setProductions] = useState([])
   const [dispatches, setDispatches] = useState([])
-  const [binItems, setBinItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [msg, setMsg] = useState({ text: '', type: '' })
   const [selectedProd, setSelectedProd] = useState(null)
@@ -15,59 +14,61 @@ function Dispatch() {
   })
   const [uploading, setUploading] = useState(false)
   const [showDispatchModal, setShowDispatchModal] = useState(false)
-  const [showBin, setShowBin] = useState(false)
+  const [claimEditModal, setClaimEditModal] = useState(false)
+  const [claimEditProd, setClaimEditProd] = useState(null)
+  const [claimEditVal, setClaimEditVal] = useState('')
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  useEffect(() => { loadData() }, [])
 
   const loadData = async () => {
     setLoading(true)
     try {
       const API_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-      // Load productions that are in "ready" stage
-      const prodRes = await fetch('https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?status=eq.ready&select=id,model,quantity,enquiry_id,created_at&order=created_at.desc', {
+
+      // Ready productions
+      const pRes = await fetch('https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?status=eq.ready&select=id,model,quantity,enquiry_id&order=created_at.desc', {
         headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
       })
-      const prods = await prodRes.json()
-      
-      // Get customer names for each production
+      const prods = await pRes.json()
       if (prods && prods.length) {
-        const enqIds = [...new Set(prods.map(p => p.enquiry_id))]
-        const enqRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${enqIds.join(',')})&select=id,customer_name,mobile,location,state`, {
+        const eIds = [...new Set(prods.map(p => p.enquiry_id))]
+        const eRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${eIds.join(',')})&select=id,customer_name,mobile,location,state`, {
           headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
         })
-        const enqs = await enqRes.json()
-        enqs.forEach(e => { prods.filter(p => p.enquiry_id === e.id).forEach(p => p.customer = e) })
+        const enqs = await eRes.json()
+        enqs.forEach(e => prods.filter(p => p.enquiry_id === e.id).forEach(p => p.customer = e))
       }
       setProductions(prods || [])
 
-      // Load dispatches with production data via direct fetch
-      const dispRes = await fetch('https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/dispatch?order=created_at.desc&select=id,production_id,enquiry_id,courier_name,tracking_id,photo_urls,created_at', {
+      // Dispatched history - get ALL columns
+      const dRes = await fetch('https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/dispatch?order=created_at.desc&select=id,production_id,enquiry_id,courier_name,tracking_id,photo_urls,created_at', {
         headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
       })
-      let dispData = await dispRes.json()
+      let dData = await dRes.json()
       
-      // Get production models
-      if (dispData && dispData.length) {
-        const prodIds = [...new Set(dispData.map(d => d.production_id))]
-        const pRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?id=in.(${prodIds.join(',')})&select=id,model,quantity,enquiry_id`, {
+      // Enrich with production & enquiry data
+      if (dData && dData.length) {
+        const pIds = [...new Set(dData.map(d => d.production_id))]
+        const pRes2 = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?id=in.(${pIds.join(',')})&select=id,model,quantity,enquiry_id,grand_total,advance,claim,balance,extra_charge,gst_amount,price`, {
           headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
         })
-        const prodsData = await pRes.json()
-        const enqIds = [...new Set(prodsData.map(p => p.enquiry_id))]
-        const eRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${enqIds.join(',')})&select=id,customer_name`, {
+        const pData = await pRes2.json()
+        const eIds2 = [...new Set(pData.map(p => p.enquiry_id).filter(Boolean))]
+        const eRes2 = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${eIds2.join(',')})&select=id,customer_name,location,state,mobile,order_from,enquiry_date`, {
           headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
         })
-        const enqsData = await eRes.json()
-        dispData.forEach(d => {
-          const prod = prodsData.find(p => p.id === d.production_id)
-          d.productions = prod ? { model: prod.model, quantity: prod.quantity, enquiries: { customer_name: enqsData.find(e => e.id === prod.enquiry_id)?.customer_name || '' } } : null
+        const eData = await eRes2.json()
+        dData.forEach(d => {
+          const prod = pData.find(p => p.id === d.production_id)
+          const enq = prod ? eData.find(e => e.id === prod.enquiry_id) : null
+          d.enquiry = enq || null
+          d.production = prod || null
         })
       }
-      setDispatches(dispData || [])
+      setDispatches(dData || [])
     } catch (err) {
-      console.error('Error loading data:', err)
+      console.error('Error:', err)
+      setMsg({ text: 'Error loading data', type: 'error' })
     } finally {
       setLoading(false)
     }
@@ -75,15 +76,10 @@ function Dispatch() {
 
   const openDispatchModal = (prod) => {
     setSelectedProd(prod)
-    setDispatchForm({
-      courier_name: '',
-      tracking_id: '',
-      photo_urls: []
-    })
+    setDispatchForm({ courier_name: '', tracking_id: '', photo_urls: [] })
     setShowDispatchModal(true)
   }
 
-  // Compress image to under 50KB
   const compressImage = (file, maxSizeKB = 50) => {
     return new Promise((resolve) => {
       const reader = new FileReader()
@@ -95,26 +91,21 @@ function Dispatch() {
           let quality = 0.7
           let canvas = document.createElement('canvas')
           let w = img.width, h = img.height
-          const maxDim = 600 // max width/height
+          const maxDim = 600
           if (w > maxDim || h > maxDim) {
             if (w > h) { h = h * (maxDim / w); w = maxDim }
             else { w = w * (maxDim / h); h = maxDim }
           }
-          canvas.width = w
-          canvas.height = h
+          canvas.width = w; canvas.height = h
           const ctx = canvas.getContext('2d')
           ctx.drawImage(img, 0, 0, w, h)
-          
-          const tryCompress = (q) => {
+          const tryC = (q) => {
             canvas.toBlob((blob) => {
-              if (blob.size > maxSizeKB * 1024 && q > 0.1) {
-                tryCompress(q - 0.15)
-              } else {
-                resolve(blob)
-              }
+              if (blob.size > maxSizeKB * 1024 && q > 0.1) tryC(q - 0.15)
+              else resolve(blob)
             }, 'image/jpeg', q)
           }
-          tryCompress(quality)
+          tryC(quality)
         }
       }
     })
@@ -122,59 +113,36 @@ function Dispatch() {
 
   const handlePhotoUpload = async (e) => {
     const files = e.target.files
-    if (!files || files.length === 0) return
-
+    if (!files || !files.length) return
     setUploading(true)
     try {
       const newUrls = []
-      
       for (const file of files) {
-        // Compress image
-        const compressedBlob = await compressImage(file, 50)
+        const compressed = await compressImage(file, 50)
         const fileName = `dispatch-${selectedProd.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
-        const filePath = `dispatch-photos/${fileName}`
-
-        const { error: uploadError } = await supabase.storage
-          .from('dispatch-photos')
-          .upload(filePath, compressedBlob, { contentType: 'image/jpeg' })
-
-        if (uploadError) throw uploadError
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('dispatch-photos')
-          .getPublicUrl(filePath)
-
+        const { error: upErr } = await supabase.storage.from('dispatch-photos').upload(`dispatch-photos/${fileName}`, compressed, { contentType: 'image/jpeg' })
+        if (upErr) throw upErr
+        const { data: { publicUrl } } = supabase.storage.from('dispatch-photos').getPublicUrl(`dispatch-photos/${fileName}`)
         newUrls.push(publicUrl)
       }
-
-      setDispatchForm(prev => ({
-        ...prev,
-        photo_urls: [...prev.photo_urls, ...newUrls]
-      }))
-    } catch (err) {
-      setMsg({ text: 'Error uploading photo: ' + err.message, type: 'error' })
-    } finally {
-      setUploading(false)
-    }
+      setDispatchForm(p => ({ ...p, photo_urls: [...p.photo_urls, ...newUrls] }))
+    } catch (err) { setMsg({ text: 'Photo error: ' + err.message, type: 'error' }) }
+    finally { setUploading(false) }
   }
 
   const removePhoto = (url) => {
-    setDispatchForm(prev => ({
-      ...prev,
-      photo_urls: prev.photo_urls.filter(u => u !== url)
-    }))
+    setDispatchForm(p => ({ ...p, photo_urls: p.photo_urls.filter(u => u !== url) }))
   }
 
   const handleDispatchSubmit = async (e) => {
     e.preventDefault()
     if (!dispatchForm.courier_name.trim() || !dispatchForm.tracking_id.trim()) {
-      setMsg({ text: 'Courier name and tracking ID are required!', type: 'error' })
+      setMsg({ text: 'Courier name and tracking ID required!', type: 'error' })
       return
     }
-
     try {
       const API_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-      const res = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/rpc/create_dispatch`, {
+      const res = await fetch('https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/rpc/create_dispatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: API_KEY, Authorization: 'Bearer ' + API_KEY },
         body: JSON.stringify({
@@ -189,21 +157,36 @@ function Dispatch() {
         const err = await res.json()
         throw new Error(err.message || 'Dispatch failed')
       }
-
-      // Update production status to dispatched
-      const { error: prodError } = await supabase
-        .from('productions')
-        .update({ status: 'dispatched', created_at: new Date().toISOString() })
-        .eq('id', selectedProd.id)
-      if (prodError) throw prodError
-
+      await supabase.from('productions').update({ status: 'dispatched', created_at: new Date().toISOString() }).eq('id', selectedProd.id)
       setMsg({ text: 'Dispatch recorded successfully!', type: 'success' })
       setShowDispatchModal(false)
       setSelectedProd(null)
       loadData()
-    } catch (err) {
-      setMsg({ text: 'Error: ' + err.message, type: 'error' })
-    }
+    } catch (err) { setMsg({ text: 'Error: ' + err.message, type: 'error' }) }
+  }
+
+  const openClaimEdit = (prod, enq) => {
+    setClaimEditProd({ ...prod, enquiry: enq })
+    setClaimEditVal(String(prod.claim || 0))
+    setClaimEditModal(true)
+  }
+
+  const handleClaimSave = async () => {
+    const claimVal = parseFloat(claimEditVal) || 0
+    try {
+      const prod = claimEditProd
+      const grandTotal = parseFloat(prod.grand_total) || 0
+      const advance = parseFloat(prod.advance) || 0
+      const extra = parseFloat(prod.extra_charge) || 0
+      const gstAmt = parseFloat(prod.gst_amount) || 0
+      const balance = grandTotal - advance - claimVal
+      
+      await supabase.from('productions').update({ claim: claimVal, balance: balance }).eq('id', prod.id)
+      setMsg({ text: `Claim updated to ₹${claimVal}. Balance: ₹${balance}`, type: 'success' })
+      setClaimEditModal(false)
+      setClaimEditProd(null)
+      loadData()
+    } catch (err) { setMsg({ text: 'Error: ' + err.message, type: 'error' }) }
   }
 
   return (
@@ -215,45 +198,27 @@ function Dispatch() {
       {msg.text && (
         <div className={`alert alert-${msg.type}`}>
           {msg.text}
-          <button 
-            style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}
-            onClick={() => setMsg({ text: '', type: '' })}
-          >×</button>
+          <button style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }} onClick={() => setMsg({ text: '', type: '' })}>×</button>
         </div>
       )}
 
       {/* Ready to Dispatch */}
       <h2 style={{ fontSize: '18px', marginBottom: '12px', color: '#1a1a2e' }}>Ready to Dispatch</h2>
       <div className="card" style={{ overflowX: 'auto' }}>
-        {loading ? (
-          <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>Loading...</p>
-        ) : productions.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No items ready for dispatch. Click "Ready" stage in Production first.</p>
-        ) : (
+        {loading ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>Loading...</p>
+        : productions.length === 0 ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No items ready for dispatch. Click "Ready" stage in Production first.</p>
+        : (
           <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Customer</th>
-                <th>Model</th>
-                <th>Quantity</th>
-                <th>Contact</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+            <thead><tr><th>ID</th><th>Customer</th><th>Model</th><th>Qty</th><th>Contact</th><th>Action</th></tr></thead>
             <tbody>
-              {productions.map((prod) => (
+              {productions.map(prod => (
                 <tr key={prod.id}>
                   <td style={{ fontWeight: 600 }}>#{prod.id}</td>
                   <td>{prod.customer?.customer_name || 'N/A'}</td>
                   <td>{prod.model || 'N/A'}</td>
                   <td>{prod.quantity}</td>
                   <td>{prod.customer?.mobile || prod.customer?.location || 'N/A'}</td>
-                  <td>
-                    <button className="btn btn-sm btn-success" onClick={() => openDispatchModal(prod)}>
-                      📦 Dispatch Now
-                    </button>
-                  </td>
+                  <td><button className="btn btn-sm btn-success" onClick={() => openDispatchModal(prod)}>📦 Dispatch Now</button></td>
                 </tr>
               ))}
             </tbody>
@@ -264,40 +229,46 @@ function Dispatch() {
       {/* Dispatch History */}
       <h2 style={{ fontSize: '18px', margin: '24px 0 12px', color: '#1a1a2e' }}>Dispatch History</h2>
       <div className="card" style={{ overflowX: 'auto' }}>
-        {dispatches.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No dispatches yet.</p>
-        ) : (
+        {loading ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>Loading...</p>
+        : dispatches.length === 0 ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No dispatches yet.</p>
+        : (
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Model</th>
-                <th>Courier</th>
-                <th>Tracking ID</th>
-                <th>Photos</th>
+                <th>Date</th><th>Customer</th><th>Model</th><th>Qty</th><th>Grand Total</th><th>Advance</th><th>Claim</th><th>Balance</th><th>Courier</th><th>Tracking</th><th>Photos</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {dispatches.map((disp) => (
+              {dispatches.map(disp => (
                 <tr key={disp.id}>
-                  <td>{new Date(disp.dispatched_at).toLocaleDateString()}</td>
-                  <td style={{ fontWeight: 600 }}>{disp.productions?.enquiries?.customer_name || 'N/A'}</td>
-                  <td>{disp.productions?.model || 'N/A'}</td>
+                  <td>{new Date(disp.created_at).toLocaleDateString()}</td>
+                  <td style={{ fontWeight: 600 }}>{disp.enquiry?.customer_name || 'N/A'}</td>
+                  <td>{disp.production?.model || 'N/A'}</td>
+                  <td>{disp.production?.quantity || '-'}</td>
+                  <td style={{ color: '#2e7d32', fontWeight: 600 }}>₹{parseFloat(disp.production?.grand_total || 0).toFixed(2)}</td>
+                  <td style={{ color: '#e94560', fontWeight: 600 }}>₹{parseFloat(disp.production?.advance || 0).toFixed(2)}</td>
+                  <td>
+                    <span style={{ color: '#f39c12', fontWeight: 600, cursor: 'pointer' }} 
+                      onClick={() => openClaimEdit(disp.production, disp.enquiry)}
+                      title="Click to edit claim">₹{parseFloat(disp.production?.claim || 0).toFixed(2)} ✏️</span>
+                  </td>
+                  <td style={{ color: '#e65100', fontWeight: 600 }}>₹{parseFloat(disp.production?.balance || 0).toFixed(2)}</td>
                   <td><span className="badge badge-info">{disp.courier_name}</span></td>
-                  <td style={{ fontWeight: 600 }}>{disp.tracking_id}</td>
+                  <td style={{ fontWeight: 600, fontSize: '12px' }}>{disp.tracking_id}</td>
                   <td>
                     {disp.photo_urls && disp.photo_urls.length > 0 ? (
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        {disp.photo_urls.map((url, i) => (
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        {disp.photo_urls.slice(0, 2).map((url, i) => (
                           <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                            <img src={url} alt={`Dispatch ${i+1}`} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px' }} />
+                            <img src={url} alt={`Photo ${i+1}`} style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '4px' }} />
                           </a>
                         ))}
+                        {disp.photo_urls.length > 2 && <span style={{ fontSize: '10px', color: '#999' }}>+{disp.photo_urls.length - 2}</span>}
                       </div>
-                    ) : (
-                      <span className="badge badge-secondary">No photos</span>
-                    )}
+                    ) : <span className="badge badge-secondary">No</span>}
+                  </td>
+                  <td>
+                    <button className="btn btn-sm btn-warning" onClick={() => openClaimEdit(disp.production, disp.enquiry)}>💰 Claim</button>
                   </td>
                 </tr>
               ))}
@@ -306,7 +277,7 @@ function Dispatch() {
         )}
       </div>
 
-      {/* Dispatch Modal */}
+      {/* New Dispatch Modal */}
       {showDispatchModal && (
         <div className="modal-overlay" onClick={() => setShowDispatchModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -322,53 +293,25 @@ function Dispatch() {
               <div className="form-grid">
                 <div className="form-group">
                   <label>Courier Name *</label>
-                  <select
-                    value={dispatchForm.courier_name}
-                    onChange={(e) => setDispatchForm(prev => ({ ...prev, courier_name: e.target.value }))}
-                    required
-                  >
+                  <select value={dispatchForm.courier_name} onChange={e => setDispatchForm(p => ({ ...p, courier_name: e.target.value }))} required>
                     <option value="">Select courier</option>
-                    <option value="DTDC">DTDC</option>
-                    <option value="Delhivery">Delhivery</option>
-                    <option value="Blue Dart">Blue Dart</option>
-                    <option value="FedEx">FedEx</option>
-                    <option value="India Post">India Post</option>
-                    <option value="Ekart">Ekart</option>
-                    <option value="XpressBees">XpressBees</option>
-                    <option value="Amazon Shipping">Amazon Shipping</option>
-                    <option value="Other">Other</option>
+                    <option value="DTDC">DTDC</option><option value="Delhivery">Delhivery</option><option value="Blue Dart">Blue Dart</option>
+                    <option value="FedEx">FedEx</option><option value="India Post">India Post</option><option value="Ekart">Ekart</option>
+                    <option value="XpressBees">XpressBees</option><option value="Amazon Shipping">Amazon Shipping</option><option value="Other">Other</option>
                   </select>
                 </div>
                 <div className="form-group">
                   <label>Tracking ID *</label>
-                  <input
-                    type="text"
-                    value={dispatchForm.tracking_id}
-                    onChange={(e) => setDispatchForm(prev => ({ ...prev, tracking_id: e.target.value }))}
-                    placeholder="Enter tracking number"
-                    required
-                  />
+                  <input type="text" value={dispatchForm.tracking_id} onChange={e => setDispatchForm(p => ({ ...p, tracking_id: e.target.value }))} placeholder="Enter tracking number" required />
                 </div>
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                  <label>Upload Photos (Optional)</label>
+                  <label>📸 Upload Photos (Optional - compressed to 50KB)</label>
                   <div className="photo-upload-area">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handlePhotoUpload}
-                      style={{ display: 'none' }}
-                      id="photo-upload"
-                    />
-                    <label htmlFor="photo-upload" style={{ cursor: 'pointer', display: 'block' }}>
-                      {uploading ? (
-                        <span>Uploading...</span>
-                      ) : (
-                        <>
-                          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📸</div>
-                          <p style={{ color: '#666' }}>Click to upload photos</p>
-                          <p style={{ color: '#999', fontSize: '12px' }}>JPEG, PNG, GIF</p>
-                        </>
+                    <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} id="dispatch-photo-upload" />
+                    <label htmlFor="dispatch-photo-upload" style={{ cursor: 'pointer', display: 'block' }}>
+                      {uploading ? <span>⏳ Uploading...</span> : (
+                        <><div style={{ fontSize: '32px', marginBottom: '8px' }}>📸</div>
+                        <p style={{ color: '#666' }}>Click to upload photos</p></>
                       )}
                     </label>
                   </div>
@@ -377,26 +320,7 @@ function Dispatch() {
                       {dispatchForm.photo_urls.map((url, i) => (
                         <div key={i} style={{ position: 'relative' }}>
                           <img src={url} alt={`Upload ${i+1}`} />
-                          <button
-                            type="button"
-                            onClick={() => removePhoto(url)}
-                            style={{
-                              position: 'absolute',
-                              top: '-6px',
-                              right: '-6px',
-                              background: '#e74c3c',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '50%',
-                              width: '22px',
-                              height: '22px',
-                              cursor: 'pointer',
-                              fontSize: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >×</button>
+                          <button type="button" onClick={() => removePhoto(url)} style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '50%', width: '22px', height: '22px', cursor: 'pointer', fontSize: '12px' }}>×</button>
                         </div>
                       ))}
                     </div>
@@ -410,6 +334,33 @@ function Dispatch() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Claim Edit Modal */}
+      {claimEditModal && (
+        <div className="modal-overlay" onClick={() => setClaimEditModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>💰 Edit Claim Amount</h2>
+            {claimEditProd && (
+              <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
+                <p><strong>Customer:</strong> {claimEditProd.enquiry?.customer_name || 'N/A'}</p>
+                <p><strong>Model:</strong> {claimEditProd.model}</p>
+                <p><strong>Grand Total:</strong> ₹{parseFloat(claimEditProd.grand_total || 0).toFixed(2)}</p>
+                <p><strong>Advance:</strong> ₹{parseFloat(claimEditProd.advance || 0).toFixed(2)}</p>
+                <p><strong>Current Claim:</strong> ₹{parseFloat(claimEditProd.claim || 0).toFixed(2)} → New: ₹{parseFloat(claimEditVal || 0).toFixed(2)}</p>
+                <p><strong>New Balance:</strong> ₹{(parseFloat(claimEditProd.grand_total || 0) - parseFloat(claimEditProd.advance || 0) - parseFloat(claimEditVal || 0)).toFixed(2)}</p>
+              </div>
+            )}
+            <div className="form-group">
+              <label>Claim Amount</label>
+              <input type="number" value={claimEditVal} onChange={e => setClaimEditVal(e.target.value)} min="0" step="0.01" style={{ padding: '12px', border: '1.5px solid #ddd0c0', borderRadius: '8px', fontSize: '16px' }} />
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="btn btn-outline" onClick={() => setClaimEditModal(false)}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={handleClaimSave}>💾 Save Claim</button>
+            </div>
           </div>
         </div>
       )}
