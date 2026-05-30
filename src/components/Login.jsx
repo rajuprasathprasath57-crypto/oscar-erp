@@ -6,8 +6,9 @@ function Login({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Simple password protection - change this as needed
-    if (password === 'oscar2024') {
+    // Password loaded from environment variable (fallback: oscar2024)
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'oscar2024'
+    if (password === adminPassword) {
       onLogin()
     } else {
       setError('Invalid password. Please try again.')
