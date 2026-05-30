@@ -2,163 +2,44 @@ name: Daily Database Backup
 
 on:
   schedule:
-    # Run every day at 2:00 AM IST (20:30 UTC previous day)
     - cron: '30 20 * * *'
   workflow_dispatch:
-    # Manual trigger option
+
+permissions:
+  contents: write
 
 jobs:
   backup:
-    name: Export and Save Backup
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Create backup directory
+      - name: Run backup script
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: bash scripts/backup.sh
+
+      - name: Commit and push
         run: |
           BACKUP_DATE=$(date +'%Y-%m-%d')
-          mkdir -p "backups/$BACKUP_DATE"
-          echo "Created backups/$BACKUP_DATE"
-
-      - name: Export enquiries table
-        run: |
-          BACKUP_DATE=$(date +'%Y-%m-%d')
-          curl -s -X GET "${{ vars.SUPABASE_URL }}/rest/v1/enquiries?select=*" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Accept: text/csv" \
-            -o "backups/$BACKUP_DATE/enquiries.csv"
-          echo "Exported enquiries.csv ($(wc -c < "backups/$BACKUP_DATE/enquiries.csv") bytes)"
-
-      - name: Export productions table
-        run: |
-          BACKUP_DATE=$(date +'%Y-%m-%d')
-          curl -s -X GET "${{ vars.SUPABASE_URL }}/rest/v1/productions?select=*" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Accept: text/csv" \
-            -o "backups/$BACKUP_DATE/productions.csv"
-          echo "Exported productions.csv ($(wc -c < "backups/$BACKUP_DATE/productions.csv") bytes)"
-
-      - name: Export dispatch table
-        run: |
-          BACKUP_DATE=$(date +'%Y-%m-%d')
-          curl -s -X GET "${{ vars.SUPABASE_URL }}/rest/v1/dispatch?select=*" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-            -H "Accept: text/csv" \
-            -o "backups/$BACKUP_DATE/dispatch.csv"
-          echo "Exported dispatch.csv ($(wc -c < "backups/$BACKUP_DATE/dispatch.csv") bytes)"
-
-      - name: Export schema definition (extra protection)
-        run: |
-          BACKUP_DATE=$(date +'%Y-%m-%d')
-          cat <<'SQL' > "backups/$BACKUP_DATE/schema.sql"
-          -- Oscar Leather ERP - Schema Backup
-          -- Date: $(date +'%Y-%m-%d %H:%M:%S')
-          
-          CREATE TABLE IF NOT EXISTS enquiries (
-            id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            order_from TEXT NOT NULL DEFAULT 'direct',
-            enquiry_date DATE NOT NULL DEFAULT CURRENT_DATE,
-            customer_name TEXT NOT NULL,
-            location TEXT, state TEXT, contact TEXT, mobile TEXT,
-            quotation BOOLEAN DEFAULT false, dtp BOOLEAN DEFAULT false,
-            stage TEXT DEFAULT 'enquiry', notes TEXT,
-            created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
-          );
-          
-          CREATE TABLE IF NOT EXISTS productions (
-            id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            enquiry_id BIGINT REFERENCES enquiries(id) ON DELETE CASCADE,
-            model TEXT, quantity INTEGER DEFAULT 1, price DECIMAL(10,2) DEFAULT 0,
-            total DECIMAL(10,2) DEFAULT 0, extra_charge DECIMAL(10,2) DEFAULT 0,
-            gst_percentage DECIMAL(5,2) DEFAULT 0, gst_amount DECIMAL(10,2) DEFAULT 0,
-            grand_total DECIMAL(10,2) DEFAULT 0, advance DECIMAL(10,2) DEFAULT 0,
-            claim DECIMAL(10,2) DEFAULT 0, balance DECIMAL(10,2) DEFAULT 0,
-            status TEXT DEFAULT 'cutting',
-            created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
-          );
-          
-          CREATE TABLE IF NOT EXISTS dispatch (
-            id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            production_id BIGINT, enquiry_id BIGINT,
-            courier_name TEXT, tracking_id TEXT, photo_urls TEXT[] DEFAULT '{}',
-            dispatched_at TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT NOW()
-          );
-SQL
-          echo "Exported schema.sql"
-
-      - name: List all tables exported
-        run: |
-          BACKUP_DATE=$(date +'%Y-%m-%d')
-          echo "=== Files in backups/$BACKUP_DATE ==="
-          ls -lh "backups/$BACKUP_DATE/"
-          
-          echo ""
-          echo "=== File Sizes ==="
-          for f in backups/$BACKUP_DATE/*.csv; do
-            if [ -f "$f" ]; then
-              LINES=$(wc -l < "$f")
-              echo "$(basename "$f"): $LINES lines"
-            fi
-          done
-
-      - name: Commit and push backup
-        run: |
-          BACKUP_DATE=$(date +'%Y-%m-%d')
-          git config user.name "Oscar ERP Backup Bot"
-          git config user.email "backup-bot@oscarerp.com"
-          
-          # Add new backup files
+          git config user.name "Backup Bot"
+          git config user.email "bot@oscarerp.com"
           git add backups/$BACKUP_DATE/
-          
-          # Only commit if there are changes
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "chore: daily backup - $BACKUP_DATE"
+          git diff --cached --quiet || {
+            git commit -m "chore: daily backup $BACKUP_DATE"
             git push
-            echo "Backup committed and pushed for $BACKUP_DATE"
-          fi
+          }
 
-      - name: Cleanup old backups (keep last 30 days)
+      - name: Cleanup old (keep 30 days)
         run: |
-          echo "=== Backup Cleanup: Keeping last 30 days ==="
-          
-          # List all backup directories sorted by date (oldest first)
-          BACKUP_DIRS=$(ls -d backups/*/ 2>/dev/null | sort -r | tail -n +31)
-          
-          if [ -z "$BACKUP_DIRS" ]; then
-            echo "No old backups to clean up."
-          else
-            echo "Removing old backups:"
-            for DIR in $BACKUP_DIRS; do
-              echo "  - Removing $DIR"
-              rm -rf "$DIR"
-            done
-            
-            # Commit the cleanup
-            git config user.name "Oscar ERP Backup Bot"
-            git config user.email "backup-bot@oscarerp.com"
-            git add backups/
-            if git diff --cached --quiet; then
-              echo "No cleanup changes to commit."
-            else
-              git commit -m "chore: cleanup backups older than 30 days"
-              git push
-              echo "Cleanup committed and pushed."
-            fi
-          fi
-
-      - name: Backup summary
-        run: |
-          echo "========================================="
-          echo "  ✅ DAILY BACKUP COMPLETE"
-          echo "  Date: $(date +'%Y-%m-%d %H:%M:%S')"
-          echo "  Tables: enquiries, productions, dispatch"
-          echo "  Location: backups/$(date +'%Y-%m-%d')/"
-          echo "  Repo: rajuprasathprasath57-crypto/oscar-erp"
-          echo "========================================="
+          for d in $(ls -d backups/*/ 2>/dev/null | sort -r | tail -n +31); do
+            rm -rf "$d"
+          done
+          git add backups/
+          git diff --cached --quiet || {
+            git config user.name "Backup Bot"
+            git config user.email "bot@oscarerp.com"
+            git commit -m "chore: cleanup old backups"
+            git push
+          }
