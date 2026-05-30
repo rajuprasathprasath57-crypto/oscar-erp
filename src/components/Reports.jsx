@@ -14,88 +14,65 @@ function Reports() {
   const loadReports = async () => {
     setLoading(true)
     try {
-      const API_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+      const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-      // Get ALL productions (not just dispatched) with their enquiry data
       const prodRes = await fetch(
         `https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?select=id,enquiry_id,grand_total,advance,claim,balance,extra_charge,gst_amount,total,price,quantity,model,status,created_at&order=created_at.desc`,
-        { headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY } }
+        { headers: { apikey: KEY, Authorization: 'Bearer ' + KEY } }
       )
       const allProds = await prodRes.json()
       const prods = allProds || []
 
-      // Get all enquiries
       const enqIds = [...new Set(prods.map(p => p.enquiry_id).filter(Boolean))]
       let enqData = []
       if (enqIds.length) {
         const enqRes = await fetch(
           `https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=in.(${enqIds.join(',')})&select=id,customer_name,order_from,enquiry_date`,
-          { headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY } }
+          { headers: { apikey: KEY, Authorization: 'Bearer ' + KEY } }
         )
         enqData = await enqRes.json() || []
       }
-      const enqMap = {}
-      enqData.forEach(e => { enqMap[e.id] = e })
 
-      // Get available years
       const availYears = [...new Set(prods.map(p => new Date(p.created_at).getFullYear()).filter(Boolean))].sort()
       setYears(availYears)
       if (!availYears.includes(selectedYear) && availYears.length) {
         setSelectedYear(availYears[availYears.length - 1])
       }
 
-      // Monthly breakdown for selected year
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
       const monthTotals = months.map((m, i) => {
-        const monthProds = prods.filter(p => {
-          if (!p.created_at) return false
-          const d = new Date(p.created_at)
-          return d.getFullYear() === parseInt(selectedYear) && d.getMonth() === i
-        })
+        const mp = prods.filter(p => { if (!p.created_at) return false; const d = new Date(p.created_at); return d.getFullYear() === parseInt(selectedYear) && d.getMonth() === i })
         return {
-          month: m,
-          count: monthProds.length,
-          dispatched: monthProds.filter(p => p.status === 'dispatched').length,
-          grand_total: monthProds.reduce((s, p) => s + parseFloat(p.grand_total || 0), 0),
-          advance: monthProds.reduce((s, p) => s + parseFloat(p.advance || 0), 0),
-          claim: monthProds.reduce((s, p) => s + parseFloat(p.claim || 0), 0),
-          balance: monthProds.reduce((s, p) => s + parseFloat(p.balance || 0), 0)
+          month: m, count: mp.length,
+          dispatched: mp.filter(p => p.status === 'dispatched').length,
+          grand_total: mp.reduce((s, p) => s + parseFloat(p.grand_total || 0), 0),
+          advance: mp.reduce((s, p) => s + parseFloat(p.advance || 0), 0),
+          balance: mp.reduce((s, p) => s + parseFloat(p.balance || 0), 0)
         }
       })
       setMonthlyData(monthTotals)
 
-      // Yearly breakdown
       const yearTotals = availYears.map(y => {
-        const yrProds = prods.filter(p => {
-          if (!p.created_at) return false
-          return new Date(p.created_at).getFullYear() === y
-        })
+        const yp = prods.filter(p => { if (!p.created_at) return false; return new Date(p.created_at).getFullYear() === y })
         return {
-          year: y,
-          count: yrProds.length,
-          dispatched: yrProds.filter(p => p.status === 'dispatched').length,
-          grand_total: yrProds.reduce((s, p) => s + parseFloat(p.grand_total || 0), 0),
-          advance: yrProds.reduce((s, p) => s + parseFloat(p.advance || 0), 0),
-          claim: yrProds.reduce((s, p) => s + parseFloat(p.claim || 0), 0),
-          balance: yrProds.reduce((s, p) => s + parseFloat(p.balance || 0), 0)
+          year: y, count: yp.length,
+          dispatched: yp.filter(p => p.status === 'dispatched').length,
+          grand_total: yp.reduce((s, p) => s + parseFloat(p.grand_total || 0), 0),
+          advance: yp.reduce((s, p) => s + parseFloat(p.advance || 0), 0),
+          balance: yp.reduce((s, p) => s + parseFloat(p.balance || 0), 0)
         }
       })
       setYearlyData(yearTotals)
-
-    } catch (err) {
-      console.error('Error loading reports:', err)
-    } finally {
-      setLoading(false)
-    }
+    } catch (err) { console.error(err) } finally { setLoading(false) }
   }
 
+  const maxGrand = Math.max(...monthlyData.map(m => m.grand_total), 1)
+  const maxBalance = Math.max(...monthlyData.map(m => m.balance), 1)
   const totalGrand = yearlyData.reduce((s, y) => s + y.grand_total, 0)
   const totalAdvance = yearlyData.reduce((s, y) => s + y.advance, 0)
   const totalBalance = yearlyData.reduce((s, y) => s + y.balance, 0)
 
-  if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>Loading reports...</div>
-  }
+  if (loading) return <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>Loading reports...</div>
 
   return (
     <div>
@@ -135,7 +112,36 @@ function Reports() {
         </div>
       </div>
 
-      {/* Monthly Breakdown */}
+      {/* Bar Chart - Grand Total & Balance by Month */}
+      <div className="card">
+        <h2 style={{ fontSize: '18px', marginBottom: '16px', color: '#1a1a2e' }}>📊 Revenue Chart - {selectedYear}</h2>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '200px', padding: '0 10px', borderBottom: '2px solid #ddd', marginBottom: '8px', position: 'relative' }}>
+          {monthlyData.map((m, i) => {
+            const gH = Math.max((m.grand_total / maxGrand) * 170, 4)
+            const bH = Math.max((m.balance / maxBalance) * 170, 4)
+            return (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', position: 'relative' }}>
+                {/* Grand Total bar */}
+                <div style={{ width: '60%', background: 'linear-gradient(180deg, #2e7d32, #4caf50)', borderRadius: '4px 4px 0 0', height: gH + 'px', minHeight: '4px', transition: 'height 0.3s', position: 'relative', marginBottom: '2px' }}
+                  title={`${m.month}: Grand Total ₹${m.grand_total.toFixed(2)}`}>
+                  {m.grand_total > 0 && <span style={{ position: 'absolute', top: '-16px', left: '50%', transform: 'translateX(-50%)', fontSize: '8px', color: '#2e7d32', fontWeight: 700 }}>₹{(m.grand_total / 1000).toFixed(1)}k</span>}
+                </div>
+                {/* Balance bar */}
+                <div style={{ width: '60%', background: 'linear-gradient(180deg, #e65100, #ff9800)', borderRadius: '4px 4px 0 0', height: bH + 'px', minHeight: '4px', transition: 'height 0.3s' }}
+                  title={`${m.month}: Balance ₹${m.balance.toFixed(2)}`}>
+                </div>
+                <span style={{ fontSize: '9px', marginTop: '4px', color: '#666', fontWeight: 600 }}>{m.month}</span>
+              </div>
+            )
+          })}
+        </div>
+        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', fontSize: '12px', color: '#666' }}>
+          <span><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#4caf50', borderRadius: '2px', marginRight: '4px' }}></span> Grand Total</span>
+          <span><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#ff9800', borderRadius: '2px', marginRight: '4px' }}></span> Balance</span>
+        </div>
+      </div>
+
+      {/* Monthly Breakdown Table */}
       <div className="card">
         <h2 style={{ fontSize: '18px', marginBottom: '16px', color: '#1a1a2e' }}>📅 Monthly Breakdown - {selectedYear}</h2>
         <div style={{ overflowX: 'auto' }}>
