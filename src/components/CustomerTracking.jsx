@@ -119,16 +119,34 @@ function CustomerTracking() {
             <p style={{ fontWeight: 600 }}>{production.enquiries?.customer_name || 'N/A'}</p>
           </div>
           <div>
+            <small style={{ color: '#999' }}>Location</small>
+            <p style={{ fontWeight: 600 }}>{production.enquiries?.location || '-'}{production.enquiries?.state ? `, ${production.enquiries.state}` : ''}</p>
+          </div>
+          <div>
             <small style={{ color: '#999' }}>Order Date</small>
             <p style={{ fontWeight: 600 }}>{production.enquiries?.enquiry_date || 'N/A'}</p>
+          </div>
+          <div>
+            <small style={{ color: '#999' }}>Source</small>
+            <p style={{ fontWeight: 600 }}>{production.enquiries?.order_from || 'N/A'}</p>
           </div>
           <div>
             <small style={{ color: '#999' }}>Quantity</small>
             <p style={{ fontWeight: 600 }}>{production.quantity}</p>
           </div>
           <div>
-            <small style={{ color: '#999' }}>Source</small>
-            <p style={{ fontWeight: 600 }}>{production.enquiries?.order_from || 'N/A'}</p>
+            <small style={{ color: '#999' }}>Grand Total</small>
+            <p style={{ fontWeight: 600, color: '#2e7d32' }}>₹{parseFloat(production.grand_total || 0).toFixed(2)}</p>
+          </div>
+          <div>
+            <small style={{ color: '#999' }}>Advance Paid</small>
+            <p style={{ fontWeight: 600, color: '#e94560' }}>₹{parseFloat(production.advance || 0).toFixed(2)}</p>
+          </div>
+          <div>
+            <small style={{ color: '#999' }}>Balance</small>
+            <p style={{ fontWeight: 600, color: parseFloat(production.balance || 0) <= 0 ? '#2ecc71' : '#e65100' }}>
+              ₹{parseFloat(production.balance || 0).toFixed(2)} {parseFloat(production.balance || 0) <= 0 && '✅ Paid'}
+            </p>
           </div>
         </div>
 
