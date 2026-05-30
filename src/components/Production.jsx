@@ -410,6 +410,7 @@ function Production() {
                     <option value="Ecom Express">Ecom Express</option>
                     <option value="DHL">DHL</option>
                     <option value="Professional">Professional Courier</option>
+                    <option value="ST Courier">ST Courier</option>
                     <option value="Other">Other (Custom)</option>
                   </select>
                   {dispatchForm.courier_name === 'Other' && (
