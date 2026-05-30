@@ -55,95 +55,140 @@ function Dashboard() {
   }
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px', fontSize: '18px', color: '#666' }}>Loading dashboard...</div>
+    return <div className="card" style={{ textAlign: 'center', padding: '40px' }}>Loading dashboard...</div>
   }
 
+  const fulfilmentRate = stats.totalEnquiries
+    ? Math.round((stats.completedProduction / stats.totalEnquiries) * 100)
+    : 0
+
   return (
-    <div>
+    <div className="dashboard-page">
+      <div className="dashboard-hero">
+        <div className="hero-panel">
+          <div className="hero-copy">
+            <span className="hero-eyebrow">Live Operations Desk</span>
+            <h1>Oscar Leather ERP</h1>
+            <p>Premium control room for enquiries, production, dispatch, and customer delivery tracking.</p>
+          </div>
+          <div className="hero-metrics">
+            <div>
+              <span>Total Orders</span>
+              <strong>{stats.totalEnquiries}</strong>
+            </div>
+            <div>
+              <span>Fulfilment</span>
+              <strong>{fulfilmentRate}%</strong>
+            </div>
+          </div>
+        </div>
+        <div className="hero-side">
+          <div className="mini-card mini-card-dark">
+            <span>Open Work</span>
+            <strong>{stats.activeProduction + stats.pendingDispatch}</strong>
+            <small>Production + dispatch queue</small>
+          </div>
+          <div className="mini-card">
+            <span>Recent Enquiries</span>
+            <strong>{stats.recentEnquiries.length}</strong>
+            <small>Latest customer activity</small>
+          </div>
+        </div>
+      </div>
+
       <div className="page-header">
-        <h1>Dashboard</h1>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px', marginBottom: '30px' }}>
-        <div className="card" style={{ textAlign: 'center', borderTop: '4px solid #3498db' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📋</div>
-          <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#2c3e50' }}>{stats.totalEnquiries}</h3>
-          <p style={{ color: '#666', fontSize: '14px' }}>Total Enquiries</p>
-        </div>
-
-        <div className="card" style={{ textAlign: 'center', borderTop: '4px solid #e94560' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏭</div>
-          <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#2c3e50' }}>{stats.activeProduction}</h3>
-          <p style={{ color: '#666', fontSize: '14px' }}>Active Production</p>
-        </div>
-
-        <div className="card" style={{ textAlign: 'center', borderTop: '4px solid #2ecc71' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
-          <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#2c3e50' }}>{stats.completedProduction}</h3>
-          <p style={{ color: '#666', fontSize: '14px' }}>Completed Production</p>
-        </div>
-
-        <div className="card" style={{ textAlign: 'center', borderTop: '4px solid #f39c12' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🚚</div>
-          <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#2c3e50' }}>{stats.pendingDispatch}</h3>
-          <p style={{ color: '#666', fontSize: '14px' }}>Pending Dispatch</p>
+        <div>
+          <h1>Dashboard</h1>
+          <span className="page-kicker">Business overview and quick actions</span>
         </div>
       </div>
 
-      <div className="card">
-        <h2 style={{ marginBottom: '16px', fontSize: '18px', color: '#1a1a2e' }}>Recent Enquiries</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Order From</th>
-              <th>Stage</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stats.recentEnquiries.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No enquiries yet</td></tr>
-            ) : (
-              stats.recentEnquiries.map((enq) => (
-                <tr key={enq.id}>
-                  <td>{enq.enquiry_date}</td>
-                  <td style={{ fontWeight: 600 }}>{enq.customer_name}</td>
-                  <td><span className="badge badge-info">{enq.order_from}</span></td>
-                  <td>
-                    <span className={`badge ${
-                      enq.stage === 'production' ? 'badge-success' : 
-                      enq.stage === 'declined' ? 'badge-danger' : 
-                      'badge-warning'
-                    }`}>{enq.stage}</span>
-                  </td>
-                  <td>
-                    <button 
-                      className="btn btn-sm btn-outline"
-                      onClick={() => navigate('/enquiries')}
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="stats-grid">
+        <div className="stat-card" style={{ '--stat-color': '#2563eb', '--stat-bg': '#eaf1ff', '--delay': '0ms' }}>
+          <div className="stat-icon">📋</div>
+          <h3>{stats.totalEnquiries}</h3>
+          <p>Total Enquiries</p>
+        </div>
+
+        <div className="stat-card" style={{ '--stat-color': '#b91c1c', '--stat-bg': '#feecec', '--delay': '80ms' }}>
+          <div className="stat-icon">🏭</div>
+          <h3>{stats.activeProduction}</h3>
+          <p>Active Production</p>
+        </div>
+
+        <div className="stat-card" style={{ '--stat-color': '#15803d', '--stat-bg': '#eaf7ee', '--delay': '160ms' }}>
+          <div className="stat-icon">✅</div>
+          <h3>{stats.completedProduction}</h3>
+          <p>Completed Production</p>
+        </div>
+
+        <div className="stat-card" style={{ '--stat-color': '#a16207', '--stat-bg': '#fff7db', '--delay': '240ms' }}>
+          <div className="stat-icon">🚚</div>
+          <h3>{stats.pendingDispatch}</h3>
+          <p>Pending Dispatch</p>
+        </div>
       </div>
 
-      <div className="card" style={{ textAlign: 'center', padding: '30px' }}>
-        <h2 style={{ marginBottom: '12px', fontSize: '18px', color: '#1a1a2e' }}>Quick Actions</h2>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary" onClick={() => navigate('/enquiries')}>
-            📋 New Enquiry
+      <div className="dashboard-workspace">
+        <div className="card recent-card">
+          <div className="card-title-row">
+            <h2>Recent Enquiries</h2>
+            <button className="btn btn-sm btn-outline" onClick={() => navigate('/enquiries')}>View All</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Order From</th>
+                <th>Stage</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.recentEnquiries.length === 0 ? (
+                <tr><td colSpan="5" style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No enquiries yet</td></tr>
+              ) : (
+                stats.recentEnquiries.map((enq) => (
+                  <tr key={enq.id}>
+                    <td>{enq.enquiry_date}</td>
+                    <td style={{ fontWeight: 700 }}>{enq.customer_name}</td>
+                    <td><span className="badge badge-info">{enq.order_from}</span></td>
+                    <td>
+                      <span className={`badge ${
+                        enq.stage === 'production' ? 'badge-success' : 
+                        enq.stage === 'declined' ? 'badge-danger' : 
+                        'badge-warning'
+                      }`}>{enq.stage}</span>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn btn-sm btn-outline"
+                        onClick={() => navigate('/enquiries')}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="action-panel">
+          <h2>Quick Actions</h2>
+          <button className="action-tile" onClick={() => navigate('/enquiries')}>
+            <span>📋</span>
+            <strong>New Enquiry</strong>
           </button>
-          <button className="btn btn-success" onClick={() => navigate('/production')}>
-            🏭 View Production
+          <button className="action-tile" onClick={() => navigate('/production')}>
+            <span>🏭</span>
+            <strong>Production</strong>
           </button>
-          <button className="btn btn-info" onClick={() => navigate('/dispatch')}>
-            🚚 Manage Dispatch
+          <button className="action-tile" onClick={() => navigate('/dispatch')}>
+            <span>🚚</span>
+            <strong>Dispatch</strong>
           </button>
         </div>
       </div>

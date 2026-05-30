@@ -17,8 +17,10 @@ function Login({ onLogin }) {
 
   return (
     <div className="login-page">
+      <div className="login-ambient" aria-hidden="true" />
       <div className="login-card">
-        <img src="/logo.png" alt="OSCAR LEATHER" style={{ width: '160px', height: 'auto', background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
+        <span className="login-pill">Secure ERP Access</span>
+        <img className="login-logo" src="/logo.png" alt="OSCAR LEATHER" />
         <h1>OSCAR LEATHER</h1>
         <p>Products ERP System</p>
         {error && <div className="alert alert-error">{error}</div>}
