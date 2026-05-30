@@ -30,29 +30,37 @@ function CustomerTracking() {
   const loadTracking = async () => {
     setLoading(true)
     try {
-      // Load production with enquiry details - use maybeSingle instead of single
-      const { data: prod, error: prodError } = await supabase
-        .from('productions')
-        .select('*, enquiries (customer_name, enquiry_date, order_from, mobile, location, state)')
-        .eq('id', id)
-        .maybeSingle()
-      
-      if (prodError) throw prodError
-      if (!prod || prod.status === 'deleted') {
+      const API_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+      // Load production with enquiry details using raw fetch
+      const prodRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/productions?id=eq.${id}&select=id,model,quantity,price,total,extra_charge,gst_percentage,gst_amount,grand_total,advance,claim,balance,status,created_at,enquiry_id`, {
+        headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+      })
+      const prods = await prodRes.json()
+      if (!prods || !prods.length || prods[0].status === 'deleted') {
         setError('Order not found!')
         return
+      }
+      const prod = prods[0]
+
+      // Get enquiry details
+      if (prod.enquiry_id) {
+        const enqRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/enquiries?id=eq.${prod.enquiry_id}&select=id,customer_name,enquiry_date,order_from,mobile,location,state`, {
+          headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+        })
+        const enqs = await enqRes.json()
+        prod.enquiries = enqs && enqs.length ? enqs[0] : null
       }
       
       setProduction(prod)
 
-      // Load dispatch info if available - use maybeSingle
-      const { data: disp } = await supabase
-        .from('dispatch')
-        .select('*')
-        .eq('production_id', id)
-        .maybeSingle()
+      // Load dispatch info using raw fetch
+      const dispRes = await fetch(`https://zvqkzysnteasdotiftgs.supabase.co/rest/v1/dispatch?production_id=eq.${id}&select=id,courier_name,tracking_id,photo_urls,created_at`, {
+        headers: { apikey: API_KEY, Authorization: 'Bearer ' + API_KEY }
+      })
+      const dispData = await dispRes.json()
+      setDispatch(dispData && dispData.length ? dispData[0] : null)
       
-      setDispatch(disp)
     } catch (err) {
       setError('Order not found or an error occurred.')
       console.error('Error loading tracking:', err)
@@ -171,7 +179,7 @@ function CustomerTracking() {
               <div>
                 <small style={{ color: '#999' }}>Dispatched On</small>
                 <p style={{ fontWeight: 600, fontSize: '16px' }}>
-                  {new Date(dispatch.dispatched_at).toLocaleDateString('en-IN', {
+                  {new Date(dispatch.created_at).toLocaleDateString('en-IN', {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
