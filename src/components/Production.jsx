@@ -401,6 +401,15 @@ function Production() {
                     <option value="India Post">India Post</option>
                     <option value="Ekart">Ekart</option>
                     <option value="XpressBees">XpressBees</option>
+                    <option value="Amazon Shipping">Amazon Shipping</option>
+                    <option value="Porter">Porter</option>
+                    <option value="Shadowfax">Shadowfax</option>
+                    <option value="LoadShare">LoadShare</option>
+                    <option value="Rider Air">Rider Air</option>
+                    <option value="Shree Maruti">Shree Maruti Courier</option>
+                    <option value="Ecom Express">Ecom Express</option>
+                    <option value="DHL">DHL</option>
+                    <option value="Professional">Professional Courier</option>
                     <option value="Other">Other (Custom)</option>
                   </select>
                   {dispatchForm.courier_name === 'Other' && (

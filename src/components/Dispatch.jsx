@@ -245,7 +245,11 @@ function Dispatch() {
                     <option value="">Select courier</option>
                     <option value="DTDC">DTDC</option><option value="Delhivery">Delhivery</option><option value="Blue Dart">Blue Dart</option>
                     <option value="FedEx">FedEx</option><option value="India Post">India Post</option><option value="Ekart">Ekart</option>
-                    <option value="XpressBees">XpressBees</option><option value="Amazon Shipping">Amazon Shipping</option><option value="Other">Other</option>
+                    <option value="XpressBees">XpressBees</option><option value="Amazon Shipping">Amazon Shipping</option>
+                    <option value="Porter">Porter</option><option value="Shadowfax">Shadowfax</option><option value="LoadShare">LoadShare</option>
+                    <option value="Rider Air">Rider Air</option><option value="Shree Maruti">Shree Maruti Courier</option>
+                    <option value="Ecom Express">Ecom Express</option><option value="DHL">DHL</option>
+                    <option value="Professional">Professional Courier</option><option value="Other">Other</option>
                   </select>
                 </div>
                 <div className="form-group"><label>Tracking ID *</label><input type="text" value={dispatchForm.tracking_id} onChange={e => setDispatchForm(p => ({ ...p, tracking_id: e.target.value }))} placeholder="Enter tracking number" required /></div>
