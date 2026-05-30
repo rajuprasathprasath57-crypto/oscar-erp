@@ -73,7 +73,7 @@ function CustomerTracking() {
     return (
       <div className="customer-tracking">
         <div className="tracking-header">
-          <img src="/logo.jpeg" alt="OSCAR LEATHER" style={{ width: '160px', height: 'auto', background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
+          <img src="/logo.png" alt="OSCAR LEATHER" style={{ width: '160px', height: 'auto', background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
           <h1>OSCAR LEATHER PRODUCTS</h1>
           <p>Loading your order status...</p>
         </div>
@@ -85,7 +85,7 @@ function CustomerTracking() {
     return (
       <div className="customer-tracking">
         <div className="tracking-header">
-          <img src="/logo.jpeg" alt="OSCAR LEATHER" style={{ width: '160px', height: 'auto', background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
+          <img src="/logo.png" alt="OSCAR LEATHER" style={{ width: '160px', height: 'auto', background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
           <h1>OSCAR LEATHER PRODUCTS</h1>
           <p>Track Your Order</p>
         </div>
@@ -103,7 +103,7 @@ function CustomerTracking() {
   return (
     <div className="customer-tracking">
       <div className="tracking-header">
-        <img src="/logo.jpeg" alt="OSCAR LEATHER" style={{ width: '160px', height: 'auto', background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
+        <img src="/logo.png" alt="OSCAR LEATHER" style={{ width: '160px', height: 'auto', background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
         <h1>OSCAR LEATHER PRODUCTS</h1>
         <p>Track Your Order Status</p>
       </div>
