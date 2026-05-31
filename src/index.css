@@ -161,11 +161,12 @@ textarea {
 .main-content {
   flex: 1;
   margin-left: 272px;
-  padding: 2px 0;
-  width: calc(100vw - 272px);
+  padding: 0 24px 24px;
+  width: auto;
   max-width: none;
   min-width: 0;
   overflow-x: hidden;
+  position: static;
 }
 
 .page-header {
@@ -1187,13 +1188,8 @@ body {
   z-index: 0;
 }
 
-.sidebar,
-.main-content {
-  position: relative;
-  z-index: 1;
-}
-
 .sidebar {
+  position: fixed;
   z-index: 1000;
   background:
     linear-gradient(180deg, rgba(11, 18, 32, 0.98) 0%, rgba(18, 32, 48, 0.98) 54%, rgba(78, 43, 28, 0.98) 100%);
