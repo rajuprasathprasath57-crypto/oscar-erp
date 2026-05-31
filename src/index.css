@@ -76,7 +76,7 @@ textarea {
 
 .brand-lockup {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   align-items: center;
 }
 
@@ -107,15 +107,15 @@ textarea {
 .sidebar nav {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 16px 12px;
+  gap: 2px;
+  padding: 8px 8px;
 }
 
 .sidebar nav a {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 4px;
+  padding: 8px 10px;
   color: #cbd5e1;
   text-decoration: none;
   font-size: 14px;
@@ -154,14 +154,14 @@ textarea {
 }
 
 .logout-link {
-  margin-top: 10px;
+  margin-top: 4px;
   border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .main-content {
   flex: 1;
   margin-left: 272px;
-  padding: 12px;
+  padding: 6px;
   width: calc(100vw - 272px);
   max-width: none;
   min-width: 0;
@@ -172,9 +172,9 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  padding: 10px 14px;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 6px 10px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(226, 232, 240, 0.92);
   border-radius: var(--radius);
@@ -202,12 +202,12 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
   gap: 18px;
-  margin-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 .hero-panel {
   min-height: 174px;
-  padding: 28px;
+  padding: 8px;
   border-radius: var(--radius);
   color: #ffffff;
   background:
@@ -225,7 +225,7 @@ textarea {
   font-size: 34px;
   line-height: 1.08;
   letter-spacing: 0;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .hero-panel p {
@@ -236,14 +236,14 @@ textarea {
 
 .hero-side {
   display: grid;
-  gap: 12px;
+  gap: 6px;
 }
 
 .mini-card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 10px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -264,8 +264,8 @@ textarea {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .stat-card {
@@ -274,7 +274,7 @@ textarea {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 10px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
@@ -309,8 +309,8 @@ textarea {
   background: rgba(255, 255, 255, 0.92);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  padding: 22px;
-  margin-bottom: 20px;
+  padding: 6px;
+  margin-bottom: 6px;
   border: 1px solid var(--line);
 }
 
@@ -320,7 +320,7 @@ textarea {
 
 .section-title,
 .card h2 {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   font-size: 18px;
   color: var(--ink);
   letter-spacing: 0;
@@ -329,7 +329,7 @@ textarea {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
+  gap: 8px;
 }
 
 .form-group {
@@ -386,8 +386,8 @@ input[type=number] {
 }
 
 .btn {
-  min-height: 40px;
-  padding: 10px 16px;
+  min-height: 32px;
+  padding: 6px 12px;
   border: 1px solid transparent;
   border-radius: var(--radius);
   font-size: 13px;
@@ -397,7 +397,7 @@ input[type=number] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   text-transform: none;
   letter-spacing: 0;
   white-space: nowrap;
@@ -455,7 +455,7 @@ input[type=number] {
 
 .btn-sm {
   min-height: 32px;
-  padding: 7px 11px;
+  padding: 4px 8px;
   font-size: 12px;
 }
 
@@ -485,7 +485,7 @@ table {
 
 table th {
   background: #f8fafc;
-  padding: 13px 14px;
+  padding: 8px 10px;
   text-align: left;
   font-size: 11px;
   font-weight: 850;
@@ -496,7 +496,7 @@ table th {
 }
 
 table td {
-  padding: 14px;
+  padding: 8px;
   border-bottom: 1px solid #edf2f7;
   font-size: 14px;
   color: var(--ink);
@@ -550,11 +550,11 @@ table tr:last-child td {
 
 .filter-bar {
   display: flex;
-  gap: 14px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: flex-end;
-  margin-bottom: 20px;
-  padding: 16px;
+  margin-bottom: 4px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
@@ -568,7 +568,7 @@ table tr:last-child td {
 .search-box {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .search-box input {
@@ -577,7 +577,7 @@ table tr:last-child td {
 
 .status-bar {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
@@ -620,7 +620,7 @@ table tr:last-child td {
   background: #f8fafc;
   border: 1px dashed #94a3b8;
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 8px;
   text-align: center;
   margin: 10px 0;
 }
@@ -639,7 +639,7 @@ table tr:last-child td {
 .photo-upload-area {
   border: 1px dashed #94a3b8;
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 8px;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
@@ -654,7 +654,7 @@ table tr:last-child td {
 .photo-preview {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
+  gap: 6px;
   margin-top: 12px;
 }
 
@@ -674,13 +674,13 @@ table tr:last-child td {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 18px;
+  padding: 10px;
 }
 
 .modal {
   background: white;
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 8px;
   width: 90%;
   max-width: 660px;
   max-height: 90vh;
@@ -699,16 +699,16 @@ table tr:last-child td {
 
 .modal-actions {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   justify-content: flex-end;
-  margin-top: 24px;
+  margin-top: 12px;
   flex-wrap: wrap;
 }
 
 .alert {
   padding: 14px 16px;
   border-radius: var(--radius);
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   font-size: 14px;
   display: flex;
   align-items: center;
@@ -730,19 +730,19 @@ table tr:last-child td {
 
 .customer-tracking {
   max-width: 940px;
-  margin: 40px auto;
-  padding: 20px;
+  margin: 20px auto;
+  padding: 10px;
 }
 
 .tracking-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 14px;
 }
 
 .tracking-header h1 {
   font-size: 32px;
   color: var(--ink);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -756,17 +756,17 @@ table tr:last-child td {
   background: white;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 30px;
-  margin-bottom: 24px;
+  padding: 14px;
+  margin-bottom: 10px;
   border: 1px solid var(--line);
 }
 
 .progress-tracker {
   display: flex;
   justify-content: space-between;
-  margin: 32px 0;
+  margin: 16px 0;
   position: relative;
-  padding: 0 24px;
+  padding: 0 12px;
 }
 
 .progress-tracker::before {
@@ -799,7 +799,7 @@ table tr:last-child td {
   justify-content: center;
   font-size: 16px;
   color: var(--muted);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   border: 3px solid #dbe6ed;
   transition: transform 0.2s, background 0.2s, border-color 0.2s;
 }
@@ -837,8 +837,8 @@ table tr:last-child td {
 
 .tracking-dispatch {
   border-top: 1px solid var(--line);
-  padding-top: 24px;
-  margin-top: 24px;
+  padding-top: 12px;
+  margin-top: 12px;
 }
 
 .login-page {
@@ -853,7 +853,7 @@ table tr:last-child td {
   background: rgba(255, 255, 255, 0.94);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 38px;
+  padding: 20px;
   text-align: center;
   border: 1px solid var(--line);
 }
@@ -878,13 +878,13 @@ table tr:last-child td {
 
 .login-card p {
   color: var(--muted);
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   font-weight: 600;
 }
 
 .quick-actions {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -892,9 +892,9 @@ table tr:last-child td {
 .money-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
+  gap: 4px;
   background: #f8fafc;
-  padding: 12px;
+  padding: 6px;
   border-radius: var(--radius);
   border: 1px solid var(--line);
 }
@@ -960,17 +960,17 @@ table tr:last-child td {
 
   .main-content {
     margin-left: 0;
-    padding: 12px;
+    padding: 6px;
     width: 100%;
     max-width: 100%;
   }
 
   .page-header {
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
     align-items: stretch;
     margin-bottom: 14px;
-    padding: 16px;
+    padding: 8px;
   }
 
   .page-header h1 {
@@ -984,7 +984,7 @@ table tr:last-child td {
 
   .hero-panel {
     min-height: auto;
-    padding: 20px;
+    padding: 10px;
     background-image: linear-gradient(135deg, rgba(17, 24, 39, 0.96), rgba(92, 50, 31, 0.94));
   }
 
@@ -998,7 +998,7 @@ table tr:last-child td {
   }
 
   .card {
-    padding: 14px;
+    padding: 8px;
     margin-bottom: 14px;
   }
 
@@ -1018,7 +1018,7 @@ table tr:last-child td {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
-    padding: 14px;
+    padding: 8px;
   }
 
   .filter-bar .form-group,
@@ -1037,7 +1037,7 @@ table tr:last-child td {
 
   .modal {
     width: 100%;
-    padding: 18px;
+    padding: 10px;
   }
 
   .modal h2 {
@@ -1062,7 +1062,7 @@ table tr:last-child td {
   }
 
   .tracking-order-card {
-    padding: 16px;
+    padding: 8px;
   }
 
   .progress-tracker {
@@ -1098,7 +1098,7 @@ table tr:last-child td {
   }
 
   .card {
-    padding: 12px;
+    padding: 6px;
   }
 
   table th,
@@ -1319,7 +1319,7 @@ body {
 
 .hero-eyebrow {
   display: inline-flex;
-  padding: 7px 11px;
+  padding: 4px 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
@@ -1328,7 +1328,7 @@ body {
   font-weight: 850;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 .hero-panel h1 {
@@ -1344,7 +1344,7 @@ body {
 
 .hero-metrics {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -1455,7 +1455,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   margin-bottom: 12px;
 }
 
@@ -1467,8 +1467,8 @@ body {
   position: sticky;
   top: 24px;
   display: grid;
-  gap: 12px;
-  padding: 18px;
+  gap: 6px;
+  padding: 10px;
   border-radius: var(--radius);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.78));
   border: 1px solid var(--premium-border);
@@ -1487,9 +1487,9 @@ body {
   display: grid;
   grid-template-columns: 38px 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   width: 100%;
-  padding: 14px;
+  padding: 8px;
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: var(--radius);
   background: #ffffff;
@@ -1576,8 +1576,8 @@ table tbody tr:hover {
 
 .login-pill {
   display: inline-flex;
-  padding: 7px 11px;
-  margin-bottom: 16px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent);
@@ -1757,7 +1757,7 @@ table tbody tr:hover {
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 8px;
   margin-bottom: 18px;
 }
 
@@ -1769,7 +1769,7 @@ table tbody tr:hover {
 
 .production-tools {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -1813,14 +1813,14 @@ table tbody tr:hover {
 .report-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .report-metric-card {
   position: relative;
   min-height: 150px;
-  padding: 20px;
+  padding: 10px;
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--premium-border);
@@ -1913,7 +1913,7 @@ table tbody tr:hover {
 }
 
 .dispatch-page .data-card {
-  padding: 18px;
+  padding: 10px;
 }
 
 .dispatch-page table {
