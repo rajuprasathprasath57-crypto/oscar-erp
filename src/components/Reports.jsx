@@ -72,14 +72,17 @@ function Reports() {
   const totalAdvance = yearlyData.reduce((s, y) => s + y.advance, 0)
   const totalBalance = yearlyData.reduce((s, y) => s + y.balance, 0)
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>Loading reports...</div>
+  if (loading) return <div className="card" style={{ textAlign: 'center', padding: '40px' }}>Loading reports...</div>
 
   return (
-    <div>
+    <div className="erp-page reports-page">
       <div className="page-header">
-        <h1>📊 Reports</h1>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <label style={{ fontSize: '13px', color: '#8b7355', fontWeight: 700 }}>Year:</label>
+        <div>
+          <h1>📊 Reports</h1>
+          <span className="page-kicker">Revenue, advances, balances, and yearly production performance.</span>
+        </div>
+        <div className="page-actions report-year-picker">
+          <label>Year:</label>
           <select value={selectedYear} onChange={e => setSelectedYear(parseInt(e.target.value))}
             style={{ padding: '8px 12px', border: '1.5px solid #ddd0c0', borderRadius: '8px', background: 'white' }}>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -89,33 +92,33 @@ function Reports() {
       </div>
 
       {/* Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <div className="card" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '28px', marginBottom: '4px' }}>💰</div>
+      <div className="report-summary-grid">
+        <div className="report-metric-card" style={{ '--metric-color': '#15803d', '--metric-bg': '#eaf7ee' }}>
+          <div className="report-icon">💰</div>
           <h3 style={{ fontSize: '22px', color: '#2e7d32', fontWeight: 700 }}>₹{totalGrand.toLocaleString('en-IN', {minimumFractionDigits:2})}</h3>
           <p style={{ color: '#666', fontSize: '13px' }}>Total Grand Amount</p>
         </div>
-        <div className="card" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '28px', marginBottom: '4px' }}>💳</div>
+        <div className="report-metric-card" style={{ '--metric-color': '#b91c1c', '--metric-bg': '#feecec' }}>
+          <div className="report-icon">💳</div>
           <h3 style={{ fontSize: '22px', color: '#e94560', fontWeight: 700 }}>₹{totalAdvance.toLocaleString('en-IN', {minimumFractionDigits:2})}</h3>
           <p style={{ color: '#666', fontSize: '13px' }}>Total Advance Received</p>
         </div>
-        <div className="card" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '28px', marginBottom: '4px' }}>📋</div>
+        <div className="report-metric-card" style={{ '--metric-color': '#a16207', '--metric-bg': '#fff7db' }}>
+          <div className="report-icon">📋</div>
           <h3 style={{ fontSize: '22px', color: '#e65100', fontWeight: 700 }}>₹{totalBalance.toLocaleString('en-IN', {minimumFractionDigits:2})}</h3>
           <p style={{ color: '#666', fontSize: '13px' }}>Total Balance Pending</p>
         </div>
-        <div className="card" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '28px', marginBottom: '4px' }}>📦</div>
+        <div className="report-metric-card" style={{ '--metric-color': '#2563eb', '--metric-bg': '#eaf1ff' }}>
+          <div className="report-icon">📦</div>
           <h3 style={{ fontSize: '22px', color: '#1565c0', fontWeight: 700 }}>{yearlyData.reduce((s, y) => s + y.count, 0)}</h3>
           <p style={{ color: '#666', fontSize: '13px' }}>Total Orders</p>
         </div>
       </div>
 
       {/* Bar Chart - Grand Total & Balance by Month */}
-      <div className="card">
-        <h2 style={{ fontSize: '18px', marginBottom: '16px', color: '#1a1a2e' }}>📊 Revenue Chart - {selectedYear}</h2>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '200px', padding: '0 10px', borderBottom: '2px solid #ddd', marginBottom: '8px', position: 'relative' }}>
+      <div className="card chart-card">
+        <h2>📊 Revenue Chart - {selectedYear}</h2>
+        <div className="report-chart" style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '200px', padding: '0 10px', borderBottom: '2px solid #ddd', marginBottom: '8px', position: 'relative' }}>
           {monthlyData.map((m, i) => {
             const gH = Math.max((m.grand_total / maxGrand) * 170, 4)
             const bH = Math.max((m.balance / maxBalance) * 170, 4)
@@ -142,8 +145,8 @@ function Reports() {
       </div>
 
       {/* Monthly Breakdown Table */}
-      <div className="card">
-        <h2 style={{ fontSize: '18px', marginBottom: '16px', color: '#1a1a2e' }}>📅 Monthly Breakdown - {selectedYear}</h2>
+      <div className="card data-card">
+        <h2>📅 Monthly Breakdown - {selectedYear}</h2>
         <div style={{ overflowX: 'auto' }}>
           <table>
             <thead>
@@ -181,8 +184,8 @@ function Reports() {
       </div>
 
       {/* Yearly Breakdown */}
-      <div className="card">
-        <h2 style={{ fontSize: '18px', marginBottom: '16px', color: '#1a1a2e' }}>📆 Yearly Breakdown</h2>
+      <div className="card data-card">
+        <h2>📆 Yearly Breakdown</h2>
         <div style={{ overflowX: 'auto' }}>
           <table>
             <thead>

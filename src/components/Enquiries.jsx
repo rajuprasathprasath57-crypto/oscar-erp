@@ -205,10 +205,13 @@ function Enquiries() {
   }
 
   return (
-    <div>
+    <div className="erp-page enquiries-page">
       <div className="page-header">
-        <h1>Enquiries {showBin ? '(Bin)' : ''}</h1>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div>
+          <h1>Enquiries {showBin ? '(Bin)' : ''}</h1>
+          <span className="page-kicker">Capture leads, qualify customers, and move orders into production.</span>
+        </div>
+        <div className="page-actions">
           <button className={`btn ${showBin ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => {
               if (showBin) { setShowBin(false); return }
@@ -237,8 +240,8 @@ function Enquiries() {
       )}
 
       {!showBin && showForm && (
-        <div className="card">
-          <h2 style={{ marginBottom: '16px', fontSize: '18px', color: '#1a1a2e' }}>New Enquiry Form</h2>
+        <div className="card form-card">
+          <h2>New Enquiry Form</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
               <div className="form-group"><label>Order From *</label>
@@ -285,7 +288,7 @@ function Enquiries() {
             {(filterMonth || filterYear || searchName) && <button className="btn btn-outline" onClick={() => { setFilterMonth(''); setFilterYear(''); setSearchName(''); loadEnquiries() }}>Clear</button>}
           </div>
 
-          <div className="card" style={{ overflowX: 'auto' }}>
+          <div className="card data-card" style={{ overflowX: 'auto' }}>
             <table>
               <thead><tr><th>ID</th><th>Date</th><th>Source</th><th>Customer</th><th>Location</th><th>Contact</th><th>Quotation</th><th>DTP</th><th>Stage</th><th>Actions</th></tr></thead>
               <tbody>
@@ -322,8 +325,8 @@ function Enquiries() {
       )}
 
       {showBin && (
-        <div className="card">
-          <h2 style={{ marginBottom: '16px', fontSize: '18px', color: '#1a1a2e' }}>🗑️ Enquiry Bin</h2>
+        <div className="card data-card">
+          <h2>🗑️ Enquiry Bin</h2>
           {binItems.length === 0 ? (
             <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>Bin is empty</p>
           ) : (

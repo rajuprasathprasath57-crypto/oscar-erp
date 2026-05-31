@@ -245,9 +245,12 @@ function Production() {
   }
 
   return (
-    <div>
+    <div className="erp-page production-page">
       <div className="page-header">
-        <h1>Production {showBin ? '(Bin)' : ''}</h1>
+        <div>
+          <h1>Production {showBin ? '(Bin)' : ''}</h1>
+          <span className="page-kicker">Move orders through every workshop stage with live tracking links.</span>
+        </div>
           <button className={`btn ${showBin ? 'btn-primary' : 'btn-outline'}`} onClick={() => { setShowBin(!showBin); if (!showBin) loadBin(); }}>
           🗑️ {showBin ? 'Back to Production' : `Bin (${binItems.length})`}
         </button>
@@ -261,8 +264,8 @@ function Production() {
       )}
 
       {showBin ? (
-        <div className="card">
-          <h2 style={{ marginBottom: '16px', fontSize: '18px', color: '#1a1a2e' }}>🗑️ Production Bin</h2>
+        <div className="card data-card">
+          <h2>🗑️ Production Bin</h2>
           {binItems.length === 0 ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>Bin is empty</p>
           : (
             <table>
@@ -286,19 +289,19 @@ function Production() {
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: '16px' }}>
+        <div className="production-list">
           {loading ? <div className="card" style={{ textAlign: 'center', padding: '40px', color: '#999' }}>Loading...</div>
           : productions.length === 0 ? <div className="card" style={{ textAlign: 'center', padding: '40px', color: '#999' }}>No productions yet.</div>
           : productions.map((prod) => (
-              <div key={prod.id} className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+              <div key={prod.id} className="card production-card">
+                <div className="production-card-header">
                   <div>
-                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1a1a2e' }}>#{prod.id} - {prod.model || 'No Model'}</h3>
+                    <h3>#{prod.id} - {prod.model || 'No Model'}</h3>
                     <p style={{ color: '#666', fontSize: '13px', marginTop: '4px' }}>
                       Customer: <strong>{prod.enquiries?.customer_name || 'N/A'}</strong> | Date: {prod.enquiries?.enquiry_date || 'N/A'} | Source: {prod.enquiries?.order_from || 'N/A'}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div className="production-tools">
                     <button className="btn btn-sm btn-info" onClick={() => openEditModal(prod)}>✏️ Edit</button>
                     <button className="btn btn-sm btn-danger" onClick={() => handleDelete(prod.id)}>🗑️</button>
                     <div className="tracking-link-box" style={{ padding: '8px 12px', margin: 0 }}>
@@ -333,7 +336,7 @@ function Production() {
                   })}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px', background: '#f8f9fa', padding: '12px', borderRadius: '8px' }}>
+                <div className="money-grid">
                   <div><small style={{ color: '#999' }}>Qty</small><br /><strong>{prod.quantity}</strong></div>
                   <div><small style={{ color: '#999' }}>Price</small><br /><strong>₹{parseFloat(prod.price).toFixed(2)}</strong></div>
                   <div><small style={{ color: '#999' }}>Total</small><br /><strong>₹{parseFloat(prod.total).toFixed(2)}</strong></div>

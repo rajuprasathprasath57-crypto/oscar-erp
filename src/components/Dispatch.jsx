@@ -163,13 +163,18 @@ function Dispatch() {
   }
 
   return (
-    <div>
-      <div className="page-header"><h1>🚚 Dispatch</h1></div>
+    <div className="erp-page dispatch-page">
+      <div className="page-header">
+        <div>
+          <h1>🚚 Dispatch</h1>
+          <span className="page-kicker">Ship ready orders, track couriers, claims, payments, and delivery photos.</span>
+        </div>
+      </div>
 
       {msg.text && (<div className={`alert alert-${msg.type}`}>{msg.text}<button style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }} onClick={() => setMsg({ text: '', type: '' })}>×</button></div>)}
 
-      <h2 style={{ fontSize: '18px', marginBottom: '12px', color: '#1a1a2e' }}>Ready to Dispatch</h2>
-      <div className="card" style={{ overflowX: 'auto' }}>
+      <h2 className="section-title">Ready to Dispatch</h2>
+      <div className="card data-card" style={{ overflowX: 'auto' }}>
         {loading ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>Loading...</p>
         : productions.length === 0 ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No items ready for dispatch.</p>
         : <table>
@@ -188,8 +193,8 @@ function Dispatch() {
           </table>}
       </div>
 
-      <h2 style={{ fontSize: '18px', margin: '24px 0 12px', color: '#1a1a2e' }}>Dispatch History</h2>
-      <div className="card" style={{ overflowX: 'auto' }}>
+      <h2 className="section-title">Dispatch History</h2>
+      <div className="card data-card" style={{ overflowX: 'auto' }}>
         {loading ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>Loading...</p>
         : dispatches.length === 0 ? <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>No dispatches yet.</p>
         : <table>
