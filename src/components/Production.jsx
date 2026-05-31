@@ -296,7 +296,7 @@ function Production() {
               <div key={prod.id} className="card production-card">
                 <div className="production-card-header">
                   <div>
-                    <h3>#{prod.id} - {prod.model || 'No Model'}</h3>
+                    <h3>OLP#{prod.id} - {prod.model || 'No Model'}</h3>
                     <p style={{ color: '#666', fontSize: '13px', marginTop: '4px' }}>
                       Customer: <strong>{prod.enquiries?.customer_name || 'N/A'}</strong> | Date: {prod.enquiries?.enquiry_date || 'N/A'} | Source: {prod.enquiries?.order_from || 'N/A'}
                     </p>

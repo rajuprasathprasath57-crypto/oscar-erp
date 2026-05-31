@@ -296,7 +296,7 @@ function Enquiries() {
                 : enquiries.length === 0 ? <tr><td colSpan="10" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>No enquiries found</td></tr>
                 : enquiries.map(enq => (
                     <tr key={enq.id}>
-                      <td style={{ fontWeight: 600 }}>#{enq.id}</td>
+                      <td style={{ fontWeight: 600 }}>OLP#{enq.id}</td>
                       <td>{enq.enquiry_date}</td>
                       <td><span className="badge badge-info">{enq.order_from}</span></td>
                       <td style={{ fontWeight: 600 }}>{enq.customer_name}</td>
