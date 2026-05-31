@@ -30,6 +30,7 @@
 
 html {
   background: #f3f6f8;
+  overflow-x: hidden;
 }
 
 body {
@@ -39,6 +40,7 @@ body {
     linear-gradient(135deg, #f7fafc 0%, #eef3f5 100%);
   color: var(--ink);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 button,
@@ -51,6 +53,8 @@ textarea {
 .app {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: clip;
 }
 
 .sidebar {
@@ -158,7 +162,10 @@ textarea {
   flex: 1;
   margin-left: 272px;
   padding: 32px;
-  max-width: 100%;
+  width: calc(100vw - 272px);
+  max-width: calc(100vw - 272px);
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -473,6 +480,7 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   min-width: 720px;
+  max-width: 100%;
 }
 
 table th {
@@ -953,6 +961,8 @@ table tr:last-child td {
   .main-content {
     margin-left: 0;
     padding: 12px;
+    width: 100%;
+    max-width: 100%;
   }
 
   .page-header {
@@ -1184,6 +1194,7 @@ body {
 }
 
 .sidebar {
+  z-index: 1000;
   background:
     linear-gradient(180deg, rgba(11, 18, 32, 0.98) 0%, rgba(18, 32, 48, 0.98) 54%, rgba(78, 43, 28, 0.98) 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -1617,6 +1628,10 @@ table tbody tr:hover {
 /* Premium inner pages */
 .erp-page {
   animation: fadeLift 0.45s ease both;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  min-width: 0;
 }
 
 .erp-page .page-header {
@@ -1652,6 +1667,7 @@ table tbody tr:hover {
 .chart-card {
   position: relative;
   overflow: hidden;
+  max-width: 100%;
 }
 
 .form-card::before,
@@ -1695,6 +1711,15 @@ table tbody tr:hover {
 .data-card table {
   border-radius: var(--radius);
   overflow: hidden;
+}
+
+.data-card {
+  overflow-x: auto !important;
+}
+
+.data-card table {
+  width: max-content;
+  min-width: 100%;
 }
 
 .data-card table th {
@@ -1870,6 +1895,48 @@ table tbody tr:hover {
 .dispatch-page .section-title,
 .reports-page .section-title {
   margin: 24px 0 12px;
+}
+
+.dispatch-page {
+  max-width: 1320px;
+}
+
+.dispatch-page .page-header {
+  margin-bottom: 28px;
+}
+
+.dispatch-page .data-card {
+  padding: 18px;
+}
+
+.dispatch-page table {
+  min-width: 1180px;
+}
+
+.dispatch-page table th,
+.dispatch-page table td {
+  padding: 13px 18px;
+  line-height: 1.22;
+  white-space: nowrap;
+}
+
+.dispatch-page table th:nth-child(2),
+.dispatch-page table td:nth-child(2),
+.dispatch-page table th:nth-child(3),
+.dispatch-page table td:nth-child(3) {
+  white-space: normal;
+  min-width: 130px;
+}
+
+.dispatch-page table th:nth-child(15),
+.dispatch-page table td:nth-child(15) {
+  min-width: 96px;
+}
+
+.dispatch-page .card p[style*="center"] {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
 }
 
 @media (max-width: 768px) {
