@@ -161,7 +161,7 @@ textarea {
 .main-content {
   flex: 1;
   margin-left: 272px;
-  padding: 6px;
+  padding: 2px 0;
   width: calc(100vw - 272px);
   max-width: none;
   min-width: 0;
