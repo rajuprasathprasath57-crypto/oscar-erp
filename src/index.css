@@ -161,7 +161,7 @@ textarea {
 .main-content {
   flex: 1;
   margin-left: 272px;
-  padding: 32px;
+  padding: 28px;
   width: calc(100vw - 272px);
   max-width: calc(100vw - 272px);
   min-width: 0;
@@ -1259,11 +1259,18 @@ body {
 
 .dashboard-page {
   animation: fadeLift 0.5s ease both;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .dashboard-hero {
   grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.5fr);
   gap: 20px;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .hero-panel {
@@ -1629,8 +1636,8 @@ table tbody tr:hover {
 .erp-page {
   animation: fadeLift 0.45s ease both;
   width: 100%;
-  max-width: 1320px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   min-width: 0;
 }
 
@@ -1898,7 +1905,7 @@ table tbody tr:hover {
 }
 
 .dispatch-page {
-  max-width: 1320px;
+  max-width: none;
 }
 
 .dispatch-page .page-header {
