@@ -636,6 +636,14 @@ table tr:last-child td { border-bottom: none; }
   z-index: 999999;
   padding: 20px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent background scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
 }
 
 .modal {
