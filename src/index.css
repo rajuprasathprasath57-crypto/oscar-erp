@@ -672,11 +672,12 @@ table tr:last-child td {
   inset: 0;
   background: rgba(15, 23, 42, 0.58);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 999999;
-  padding: 20px;
+  padding: 30px 20px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal {
@@ -685,9 +686,7 @@ table tr:last-child td {
   padding: 20px;
   width: 100%;
   max-width: 580px;
-  max-height: 90vh;
-  overflow-y: auto;
-  margin: auto;
+  margin: auto 0;
   box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
   border: 1px solid var(--line);
   position: relative;
