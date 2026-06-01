@@ -172,11 +172,6 @@ function Enquiries() {
     })
   }
 
-  const closeMTPModal = () => {
-    setShowMTPModal(false)
-    setSelectedEnquiry(null)
-  }
-
   const handleMTPSubmit = async (e) => {
     e.preventDefault()
     if (!mtpForm.model.trim()) { setMsg({ text: 'Model name is required!', type: 'error' }); return }
@@ -200,7 +195,7 @@ function Enquiries() {
       const { error } = await supabase.from('productions').insert([insertData])
       if (error) throw error
       setMsg({ text: 'Moved to Production successfully!', type: 'success' })
-      closeMTPModal(); setSelectedEnquiry(null); loadEnquiries()
+      setShowMTPModal(false); setSelectedEnquiry(null); loadEnquiries()
     } catch (err) { setMsg({ text: 'Error: ' + err.message, type: 'error' }) }
   }
 
@@ -361,7 +356,7 @@ function Enquiries() {
       )}
 
       {showMTPModal && (
-        <div className="modal-overlay" onClick={closeMTPModal}>
+        <div className="modal-overlay" onClick={() => setShowMTPModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h2>📦 Move to Production</h2>
             <p style={{ color: '#666', marginBottom: '16px' }}>Customer: <strong>{selectedEnquiry?.customer_name}</strong> | Date: <strong>{selectedEnquiry?.enquiry_date}</strong></p>
@@ -384,7 +379,7 @@ function Enquiries() {
                 <div className="form-group"><label>Balance</label><input type="number" value={mtpForm.balance.toFixed(2)} disabled style={{ fontWeight: 700, color: '#e65100' }} /></div>
               </div>
               <div className="modal-actions">
-                <button type="button" className="btn btn-outline" onClick={closeMTPModal}>Cancel</button>
+                <button type="button" className="btn btn-outline" onClick={() => setShowMTPModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-success">✅ Confirm MTP</button>
               </div>
             </form>
