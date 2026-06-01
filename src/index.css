@@ -688,6 +688,8 @@ table tr:last-child td {
   overflow-y: auto;
   box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
   border: 1px solid var(--line);
+  position: relative;
+  z-index: 1001;
 }
 
 .modal h2 {
@@ -1245,7 +1247,6 @@ body {
 .page-header,
 .card,
 .filter-bar,
-.modal,
 .tracking-order-card {
   background: var(--premium-card);
   border-color: var(--premium-border);
