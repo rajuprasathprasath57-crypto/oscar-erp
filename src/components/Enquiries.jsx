@@ -150,7 +150,6 @@ function Enquiries() {
     setSelectedEnquiry(enquiry)
     setMtpForm({ model: '', quantity: '', price: '', total: 0, extra_charge: '', gst_percentage: 0, gst_amount: 0, grand_total: 0, advance: '', claim: '', balance: 0 })
     setShowMTPModal(true)
-    document.body.classList.add('modal-open')
   }
 
   const handleMtpFormChange = (e) => {
@@ -175,7 +174,7 @@ function Enquiries() {
 
   const closeMTPModal = () => {
     setShowMTPModal(false)
-    document.body.classList.remove('modal-open')
+    setSelectedEnquiry(null)
   }
 
   const handleMTPSubmit = async (e) => {
