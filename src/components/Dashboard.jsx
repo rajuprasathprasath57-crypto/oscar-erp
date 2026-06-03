@@ -104,25 +104,25 @@ function Dashboard() {
       </div>
 
       <div className="stats-grid">
-        <div className="stat-card" style={{ '--stat-color': '#2563eb', '--stat-bg': '#eaf1ff', '--delay': '0ms' }}>
+        <div className="stat-card">
           <div className="stat-icon">📋</div>
           <h3>{stats.totalEnquiries}</h3>
           <p>Total Enquiries</p>
         </div>
 
-        <div className="stat-card" style={{ '--stat-color': '#b91c1c', '--stat-bg': '#feecec', '--delay': '80ms' }}>
+        <div className="stat-card">
           <div className="stat-icon">🏭</div>
           <h3>{stats.activeProduction}</h3>
           <p>Active Production</p>
         </div>
 
-        <div className="stat-card" style={{ '--stat-color': '#15803d', '--stat-bg': '#eaf7ee', '--delay': '160ms' }}>
+        <div className="stat-card">
           <div className="stat-icon">✅</div>
           <h3>{stats.completedProduction}</h3>
           <p>Completed Production</p>
         </div>
 
-        <div className="stat-card" style={{ '--stat-color': '#a16207', '--stat-bg': '#fff7db', '--delay': '240ms' }}>
+        <div className="stat-card">
           <div className="stat-icon">🚚</div>
           <h3>{stats.pendingDispatch}</h3>
           <p>Pending Dispatch</p>
